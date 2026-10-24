@@ -7,4 +7,4 @@ sys.path.insert(0, ROOT)
 
 import astro  # noqa: E402
 
-astro.set_ephe(os.path.join(ROOT, "data", "ephe"))
+astro.set_ephe(os.environ.get("EPHE_PATH", os.path.join(ROOT, "data", "ephe")))

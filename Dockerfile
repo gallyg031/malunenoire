@@ -23,7 +23,9 @@ COPY requirements-dev.txt /tmp/
 RUN cp -r /install/. /usr/local/ \
     && pip install --no-cache-dir --root-user-action=ignore -r /tmp/requirements-dev.txt
 COPY --from=geo /src/data/geo.sqlite /opt/geo/geo.sqlite
-ENV GEO_DB=/opt/geo/geo.sqlite
+# éphémérides dans l'image, comme en production (le montage /w est lent sous Windows)
+COPY data/ephe/ /opt/ephe/
+ENV GEO_DB=/opt/geo/geo.sqlite EPHE_PATH=/opt/ephe
 WORKDIR /w
 
 # --- image finale -------------------------------------------------------------------

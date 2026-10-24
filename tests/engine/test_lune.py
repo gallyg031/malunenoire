@@ -154,11 +154,11 @@ def test_evenement_en_cours_a_start():
     assert conj and conj[0].enter < T_START and conj[0].exacts
 
 
-@pytest.mark.parametrize("body,nom", [("uranus", "Uranus")])
+@pytest.mark.parametrize("body,nom", [("jupiter", "Jupiter"), ("saturne", "Saturne"),
+                                      ("uranus", "Uranus")])
 def test_retrograde_trois_exacts(body, nom):
-    # Spec : « Jupiter ou Saturne ». Leur boucle (~10°, ~7°) dépasse l'orbe de
-    # conjonction (2 × 3°) : le triple passage y donne 3 périodes distinctes.
-    # Uranus (~4°) reste dans l'orbe toute la boucle → 1 événement, 3 exacts.
+    # Jupiter et Saturne sortent de l'orbe entre deux passages (boucle plus large
+    # que 2 × 3°) : les passages d'une même boucle sont regroupés (décision du 24/10).
     jd0 = lune.jd_from_dt(T_START)
     st = astro.stations(nom, jd0 - 365, jd0 + 365)
     retro = next(s for s in st if s[1] == "rétrograde")
@@ -178,7 +178,8 @@ def test_reference_croisee_scan_transits(body, nom):
     ref = [c for c in astro.scan_transits(None, jd0 - 10, jd0 + 31 * 13 + 10, planets=[nom],
                                           targets={"LN": L}, orbs={0: 3.0})
            if c["aspect"] == "conjonction"]
-    nos = sorted(lune.jd_from_dt(x) for e in ev for x in e.exacts if jd0 - 10 <= lune.jd_from_dt(x))
+    nos = sorted(lune.jd_from_dt(x) for e in ev for x in e.exacts
+                 if jd0 - 10 <= lune.jd_from_dt(x) <= jd0 + 31 * 13 + 10)
     leurs = sorted(j for c in ref for j in c["exact_jds"])
     assert nos and len(nos) == len(leurs)
     for a, b in zip(nos, leurs):
@@ -305,4 +306,6 @@ def test_phrases():
     assert lune.phrase(e) == "Saturne carré ta Lune Noire, sur ton point de soumission"
     e = ev("soleil", "2027-01-01", "2027-02-01", ["2027-01-15"])
     assert lune.phrase(e) == "Le Soleil sur ta Lune Noire"
+    assert lune.phrase(ev("lune_noire", "2027-01-01", "2027-02-01", ["2027-01-15"])) \
+        == "Retour de ta Lune Noire"
     assert not re.search(r"lilith", lune.phrase(e), re.I)

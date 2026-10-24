@@ -28,7 +28,7 @@ import swisseph as swe  # noqa: E402
 
 GOLDEN_PATH = os.path.join(ROOT, "tests", "engine", "golden.json")
 GOLDEN_PRIVE_PATH = os.path.join(ROOT, "tests", "engine", "golden_prive.json")
-DEFAULT_EPHE = os.path.join(ROOT, "data", "ephe")
+DEFAULT_EPHE = os.environ.get("EPHE_PATH", os.path.join(ROOT, "data", "ephe"))
 
 TOL_ARC = 1.0 / 60.0     # ± 1'
 TOL_CROSS = 0.001        # croix géométrique

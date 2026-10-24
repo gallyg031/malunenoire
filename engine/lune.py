@@ -126,15 +126,19 @@ def natal(birth_date, birth_time, lat, lon, tz):
 # ---------------------------------------------------------------- activations (§5)
 
 # corps suivis : (id, code swe, poids, pas d'échantillonnage en jours)
+# Pas ≤ 1/5 de la plus courte période possible (orbe 1,5° / vitesse max) : aucune
+# période ne peut tomber entre deux échantillons ; bornes et exacts sont ensuite
+# affinés à la minute. (Spec §5.2 : 1 j / 6 h ; élargi pour tenir 300 ms avec le
+# regroupement des boucles rétrogrades.)
 BODIES = [
-    ("pluton", swe.PLUTO, 8, 1.0),
-    ("neptune", swe.NEPTUNE, 7, 1.0),
-    ("uranus", swe.URANUS, 6, 1.0),
-    ("saturne", swe.SATURN, 5, 1.0),
-    ("jupiter", swe.JUPITER, 4, 1.0),
+    ("pluton", swe.PLUTO, 8, 5.0),       # ≥ 75 j dans l'orbe la plus étroite
+    ("neptune", swe.NEPTUNE, 7, 5.0),    # ≥ 75 j
+    ("uranus", swe.URANUS, 6, 5.0),      # ≥ 50 j
+    ("saturne", swe.SATURN, 5, 3.0),     # ≥ 23 j
+    ("jupiter", swe.JUPITER, 4, 2.0),    # ≥ 12 j
     ("lune_noire", swe.MEAN_APOG, 3, 1.0),
-    ("mars", swe.MARS, 2, 0.25),
-    ("soleil", swe.SUN, 1, 0.25),
+    ("mars", swe.MARS, 2, 0.75),         # ≥ 3,7 j
+    ("soleil", swe.SUN, 1, 0.5),         # ≥ 2,9 j
 ]
 WEIGHT = {b[0]: b[2] for b in BODIES}
 
@@ -152,6 +156,12 @@ TARGETS = {
 
 PAD_DAYS = 10.0          # marge d'échantillonnage de part et d'autre (§5.3)
 MERGE_DAYS = 7.0         # fusion de deux périodes proches (§5.3 étape 5)
+# Passages d'une même boucle rétrograde regroupés en une activation (décision du
+# 24/10/2026) : on échantillonne plus large pour retrouver les passages voisins.
+# Marge = durée max entre le 1er et le 3e passage d'une boucle.
+LOOP_PAD = {"mars": 200.0, "jupiter": 330.0, "saturne": 330.0,
+            "uranus": 400.0, "neptune": 400.0, "pluton": 400.0}
+LOOP_DAYS = 200.0        # écart max entre deux passages consécutifs d'une même boucle
 EXTEND_MAX_DAYS = 6 * 365.25   # recherche des vraies bornes d'une période en cours
 
 
@@ -261,12 +271,25 @@ def _periods(d, ts, vs, orb, step):
     return out
 
 
-def _merge(periods):
-    """Fusionne deux périodes séparées de moins de MERGE_DAYS (§5.3 étape 5)."""
+def _speed(jd, code):
+    (_, _, _, slon, *_), _ = swe.calc_ut(jd, code, astro._FLAGS)
+    return slon
+
+
+def _same_loop(code, exit_, enter):
+    """Deux périodes appartiennent à la même boucle rétrograde si le corps a changé
+    de sens entre la sortie de l'une et l'entrée de l'autre, à moins d'une boucle d'écart."""
+    return enter - exit_ < LOOP_DAYS and (_speed(exit_, code) < 0) != (_speed(enter, code) < 0)
+
+
+def _merge(periods, code=None):
+    """Fusionne deux périodes séparées de moins de MERGE_DAYS (§5.3 étape 5), et,
+    si `code` est donné, les périodes d'une même boucle rétrograde."""
     merged = []
     for p in periods:
-        if merged and merged[-1][1] is not None and p[0] is not None \
-                and p[0] - merged[-1][1] < MERGE_DAYS:
+        if merged and merged[-1][1] is not None and p[0] is not None and (
+                p[0] - merged[-1][1] < MERGE_DAYS
+                or (code is not None and _same_loop(code, merged[-1][1], p[0]))):
             merged[-1][1] = p[1]
             merged[-1][2] = sorted(set(merged[-1][2] + p[2]))
         else:
@@ -292,7 +315,9 @@ def activations(natal_, start, months=13, reading_id=""):
     events = []
 
     for body, code, weight, step in BODIES:
-        a, b = jd_start - PAD_DAYS, jd_end + PAD_DAYS
+        retro = body in LOOP_PAD
+        pad = LOOP_PAD.get(body, PAD_DAYS)
+        a, b = jd_start - pad, jd_end + pad
         count = int((b - a) / step) + 1
         ts = [a + i * step for i in range(count + 1)]
         lons = [_lon(t, code) for t in ts]
@@ -303,7 +328,8 @@ def activations(natal_, start, months=13, reading_id=""):
                 return _wrap180(_lon(t, _c) - _tg)
 
             vs = [_wrap180(x - target) for x in lons]
-            for enter, exit_, exacts in _merge(_periods(d, ts, vs, orb, step)):
+            for enter, exit_, exacts in _merge(_periods(d, ts, vs, orb, step),
+                                               code if retro else None):
                 if exit_ is not None and exit_ < jd_start:
                     continue
                 if enter is not None and enter > jd_end:
@@ -441,6 +467,8 @@ def phrase(e):
     t = ui()["activation"]
     if e.kind == "ln_ingress":
         return t["ln_ingress"].format(signe=SIGNS_FR[e.sign_to])
+    if e.body == "lune_noire" and e.aspect == "conjonction":
+        return t["retour"]
     corps = t["corps"][e.body]
     if e.aspect == "carre":
         return t["carre"][e.point].format(corps=corps)
@@ -483,7 +511,7 @@ def _fold(line):
 def _description(e, exact, tz):
     local = lambda dt: dt.astimezone(tz).date()
     p = phrase(e)
-    if p.startswith(("Le ", "Ta ")):        # en milieu de phrase
+    if p.startswith(("Le ", "Ta ", "Retour ")):        # en milieu de phrase
         p = p[0].lower() + p[1:]
     if e.kind == "ln_ingress":
         return f"{p} le {date_fr(local(exact))}."
@@ -515,7 +543,7 @@ def _vevent(e, n, exact, token, tz, stamp):
         "BEGIN:VALARM",
         "ACTION:DISPLAY",
         f"DESCRIPTION:{_esc('Ma Lune Noire — aujourd’hui')}",
-        "TRIGGER:PT9H",          # 9 h le jour même (spec : -PT9H, cf. écarts)
+        "TRIGGER:PT9H",          # 9 h le jour même (décision du 24/10/2026)
         "END:VALARM",
         "END:VEVENT",
     ]
