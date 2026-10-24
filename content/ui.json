@@ -160,6 +160,28 @@
     ],
     "pack": {"nom": "Tout savoir de ta Lune Noire", "sous": "lecture + calendrier + synastrie", "prix": "15 €", "barre": "21 €"}
   },
+  "emails": {
+    "expediteur": "Ma Lune Noire <lune@malunenoire.fr>",
+    "relire": "Relire ma Lune Noire",
+    "pied": "Tu reçois cet e-mail parce que tu l'as demandé sur malunenoire.fr.",
+    "desinscrire": "Me désinscrire",
+    "link_sujet": "Ton lien",
+    "link_corps": ["Ton lien.", "Garde-le : il est ta Lune Noire. Pas de compte, pas de mot de passe — il suffit de l'ouvrir.", "Tu recevras un rappel trois jours avant chaque activation, et une nouvelle lune par mois. Rien d'autre."],
+    "activation_sujet": "Le {date}, {phrase}.",
+    "activation_corps": ["{fenetre}, {phrase}. Exact le {date}.", "Reviens quand ça tire."],
+    "new_moon_sujet": "Nouvelle lune en {signe} : ce que ce cycle touche chez toi",
+    "new_moon_point": "Le {date}, cette nouvelle lune tombe sur ton {point}.",
+    "new_moon_maison": "Le {date}, la nouvelle lune se lève en {signe}, dans ta maison {maison}.",
+    "new_moon_signe": "Le {date}, la nouvelle lune se lève en {signe}.",
+    "new_moon_fin": "Un cycle commence. Regarde ce qui demande à naître.",
+    "alerte_sujet": "File d'e-mails saturée",
+    "alerte_corps": ["Plus de 90 e-mails attendent leur envoi depuis trois jours.", "Il faut changer de fournisseur ou de palier (spec 06 §5)."]
+  },
+  "desinscription": {
+    "titre": "Désinscription",
+    "bouton": "ME DÉSINSCRIRE",
+    "invalide": "Ce lien de désinscription n'est pas valable."
+  },
   "public": {
     "faire": "FAIS LA TIENNE",
     "titre": "{titre} · Ma Lune Noire"

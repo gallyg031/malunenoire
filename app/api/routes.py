@@ -13,6 +13,7 @@ from psycopg.rows import dict_row
 
 import lune
 from app import db
+from app.services import emails
 from app.services import readings as rd
 from app.services.corpus import CLES, PARTS
 
@@ -238,6 +239,7 @@ def email_optin(token: str, body: EmailIn):
                    set send_after = now(), sent_at = null, attempts = 0, last_error = null""",
                 (row["id"],))
             rd.event(conn, "email_optin")
+        emails.planifier(conn, rd.trouver(conn, token))     # premiers rappels sans attendre le cron
     return _no_store(JSONResponse({"ok": True, "email": rd.mask_email(email)}))
 
 

@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block titre %}{{ ui.desinscription.titre }} · {{ ui.titre_site }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block classe %}page-systeme{% endblock %}
+{% block contenu %}
+<main class="systeme">
+  <a href="/" class="marque-lien">{{ m.marque() }}</a>
+  <div class="systeme-centre">
+    {%- if fait %}
+    <p class="systeme-texte">{{ ui.systeme.desinscription }}</p>
+    {%- elif valide %}
+    {#- La désinscription part en POST : les antivirus de messagerie qui ouvrent les liens ne
+        désinscrivent personne. desinscription.js l'envoie au chargement (un seul clic). #}
+    <form method="post" id="desinscription">
+      <button type="submit" class="bouton bouton-contour">{{ ui.desinscription.bouton }}</button>
+    </form>
+    {%- else %}
+    <p class="systeme-texte">{{ ui.desinscription.invalide }}</p>
+    {%- endif %}
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}{% if valide and not fait %}<script src="/static/js/desinscription.js?v={{ version }}" defer></script>{% endif %}{% endblock %}

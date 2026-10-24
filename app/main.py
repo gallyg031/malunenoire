@@ -25,7 +25,7 @@ sys.path.insert(0, ROOT)
 
 import selftest  # noqa: E402
 import lune  # noqa: E402
-from app import config, db, web  # noqa: E402
+from app import config, cron, db, web  # noqa: E402
 from app.api import routes  # noqa: E402
 from app.services import corpus as corpus_mod  # noqa: E402
 from app.services import geocode as geo  # noqa: E402
@@ -79,6 +79,7 @@ app = FastAPI(title="Ma Lune Noire", lifespan=lifespan, docs_url=None, redoc_url
               openapi_url=None)
 app.include_router(routes.router)
 app.include_router(web.router)
+app.include_router(cron.router)
 app.mount("/static", StaticFiles(directory=os.path.join(ROOT, "static")), name="static")
 
 CHAMP_MESSAGE = {"date": "date", "time": "heure", "lat": "lieu", "lon": "lieu", "name": "lieu",

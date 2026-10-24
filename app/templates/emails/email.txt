@@ -1,0 +1,8 @@
+{% for p in paragraphes %}{{ p }}
+
+{% endfor %}{{ ui.emails.relire }} : {{ lien }}
+
+—
+{{ ui.marque }}
+{{ ui.emails.pied }}
+{{ ui.emails.desinscrire }} : {{ desinscription }}

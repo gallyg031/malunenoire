@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 
 import lune
 from app import config, db
-from app.services import cartes, rendu
+from app.services import cartes, emails, rendu
 from app.services import readings as rd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -178,3 +178,22 @@ def og_png(request: Request, share_id: str, d: str = ""):
     row, texte, signe, libelle, romain = p
     contenu = _png_og(_design(d, row, signe), signe, texte["phrase"], libelle, romain)
     return Response(contenu, media_type="image/png", headers={"Cache-Control": _cache_image(request)})
+
+
+# ---------------------------------------------------------------- désinscription (spec 06 §5)
+
+@router.get("/desinscription/{cle}", response_class=HTMLResponse)
+def desinscription(request: Request, cle: str):
+    valide = emails.verifier_desinscription(cle) is not None
+    return page(request, "desinscription.html", 200 if valide else 404, PRIVE, valide=valide, fait=False)
+
+
+@router.post("/desinscription/{cle}", response_class=HTMLResponse)
+def desinscription_post(request: Request, cle: str):
+    """Aussi la cible du désabonnement en un clic des messageries (RFC 8058)."""
+    rid = emails.verifier_desinscription(cle)
+    if rid is None:
+        return page(request, "desinscription.html", 404, PRIVE, valide=False, fait=False)
+    with db.pool.connection() as conn:
+        emails.desinscrire(conn, rid)
+    return page(request, "desinscription.html", 200, PRIVE, valide=True, fait=True)

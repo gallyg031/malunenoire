@@ -169,7 +169,8 @@ def test_email(client, sql):
     r = client.post(f"/api/reading/{token}/email", json={"email": "  Constance@Exemple.FR "})
     assert r.json() == {"ok": True, "email": "c•••@exemple.fr"}
     assert sql("select email, email_consent_at is not null from readings") == [("constance@exemple.fr", True)]
-    assert sql("select kind, sent_at from email_queue") == [("link", None)]
+    assert ("link", None) in sql("select kind, sent_at from email_queue")
+    assert {k for (k,) in sql("select distinct kind from email_queue")} <= {"link", "activation", "new_moon"}
     assert client.get(f"/api/reading/{token}").json()["email"] == "c•••@exemple.fr"
     assert client.post(f"/api/reading/{token}/email", json={"email": "pas-un-email"}).status_code == 400
     assert client.delete(f"/api/reading/{token}/email").json()["ok"]
