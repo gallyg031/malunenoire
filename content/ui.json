@@ -1,0 +1,23 @@
+{
+  "activation": {
+    "corps": {
+      "pluton": "Pluton",
+      "neptune": "Neptune",
+      "uranus": "Uranus",
+      "saturne": "Saturne",
+      "jupiter": "Jupiter",
+      "lune_noire": "Ta Lune Noire en transit",
+      "mars": "Mars",
+      "soleil": "Le Soleil"
+    },
+    "conjonction": "{corps} sur ta Lune Noire",
+    "opposition": "{corps} face à ta Lune Noire, sur ton Priape",
+    "carre": {
+      "soumission": "{corps} carré ta Lune Noire, sur ton point de soumission",
+      "affirmation": "{corps} carré ta Lune Noire, sur ton point d'affirmation"
+    },
+    "trigone": "{corps} trigone à ta Lune Noire",
+    "sextile": "{corps} sextile à ta Lune Noire",
+    "ln_ingress": "Ta Lune Noire en transit entre en {signe}"
+  }
+}
