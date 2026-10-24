@@ -11,7 +11,7 @@ import unicodedata
 import httpx
 
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-GEO_DB = os.path.join(ROOT, "data", "geo.sqlite")
+GEO_DB = os.environ.get("GEO_DB", os.path.join(ROOT, "data", "geo.sqlite"))
 PAYS_PATH = os.path.join(ROOT, "data", "pays.json")
 
 NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"

@@ -10,18 +10,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends build-essential
 COPY requirements.txt /tmp/
 RUN pip install --no-cache-dir --root-user-action=ignore --prefix=/install -r /tmp/requirements.txt
 
-# --- tests (pytest dans Linux, comme en CI) : docker compose run --rm tests -----------
-FROM deps AS dev
-COPY requirements-dev.txt /tmp/
-RUN cp -r /install/. /usr/local/ \
-    && pip install --no-cache-dir --root-user-action=ignore -r /tmp/requirements-dev.txt
-WORKDIR /w
-
 # --- base géographique GeoNames (spec 05 §5) ---------------------------------------
 FROM ${PY} AS geo
 WORKDIR /src
 COPY scripts/build_geo.py scripts/
 RUN mkdir -p data && python scripts/build_geo.py && rm -rf data/geonames
+
+# --- tests (pytest dans Linux, comme en CI) : docker compose run --rm tests -----------
+# Le code est monté en /w ; geo.sqlite (généré, hors dépôt) vient de l'étape geo.
+FROM deps AS dev
+COPY requirements-dev.txt /tmp/
+RUN cp -r /install/. /usr/local/ \
+    && pip install --no-cache-dir --root-user-action=ignore -r /tmp/requirements-dev.txt
+COPY --from=geo /src/data/geo.sqlite /opt/geo/geo.sqlite
+ENV GEO_DB=/opt/geo/geo.sqlite
+WORKDIR /w
 
 # --- image finale -------------------------------------------------------------------
 FROM ${PY}
