@@ -1,0 +1,50 @@
+{#- Image Open Graph 1200 × 630 (spec 04 §5) : fond du design, éclipse à gauche, texte à droite. -#}
+{%- set u = p.uid -%}
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {{ p.W }} {{ p.H }}" width="{{ p.W }}" height="{{ p.H }}">
+  <defs>
+    <radialGradient id="fond-{{ u }}" cx="25%" cy="50%" r="80%">
+      <stop offset="0" stop-color="#0e1017"/><stop offset="1" stop-color="#07080b"/>
+    </radialGradient>
+    <linearGradient id="voile-{{ u }}" x1="0" x2="1">
+      <stop offset="0" stop-color="#07080b" stop-opacity=".35"/><stop offset=".42" stop-color="#07080b" stop-opacity=".75"/><stop offset="1" stop-color="#07080b" stop-opacity=".92"/>
+    </linearGradient>
+    <radialGradient id="haut-{{ u }}" cx="50%" cy="-10%" r="42%">
+      <stop offset="0" stop-color="#fffcf0" stop-opacity=".28"/><stop offset="1" stop-color="#fffcf0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="diam-{{ u }}">
+      <stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".45" stop-color="#fffaeb" stop-opacity=".1"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="trait-{{ u }}">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="halo-{{ u }}" gradientUnits="userSpaceOnUse" cx="{{ p.ecl_cx }}" cy="{{ p.ecl_cy }}" r="{{ p.ecl_r + 40 }}">
+      <stop offset="{{ (p.ecl_r - 18) / (p.ecl_r + 40) }}" stop-color="#e9e4d6" stop-opacity="0"/>
+      <stop offset="{{ p.ecl_r / (p.ecl_r + 40) }}" stop-color="#e9e4d6" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#e9e4d6" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  {%- if p.design == "illustre" and p.sans_fond %}
+  {#- rendu PNG : la photo voilée est composée à part (app/services/rendu.py) #}
+  {%- elif p.design == "illustre" %}
+  <rect width="{{ p.W }}" height="{{ p.H }}" fill="#07080b"/>
+  <image href="{{ p.fond_url }}" x="0" y="-330" width="{{ p.W }}" height="2133" preserveAspectRatio="xMidYMid slice"/>
+  <rect width="{{ p.W }}" height="{{ p.H }}" fill="url(#voile-{{ u }})"/>
+  {%- else %}
+  <rect width="{{ p.W }}" height="{{ p.H }}" fill="{% if p.design == 'eclipse' %}url(#fond-{{ u }}){% else %}#07080b{% endif %}"/>
+  {%- for x, y, r, o in p.etoiles %}<circle cx="{{ x }}" cy="{{ y }}" r="{{ r }}" fill="#e9e4d6" opacity="{{ o }}"/>{% endfor %}
+  {%- set r = p.ecl_r %}{%- set cx = p.ecl_cx %}{%- set cy = p.ecl_cy %}
+  <circle cx="{{ cx }}" cy="{{ cy }}" r="{{ r + 40 }}" fill="url(#halo-{{ u }})"/>
+  <circle cx="{{ cx }}" cy="{{ cy }}" r="{{ r }}" fill="#050608" stroke="#e9e4d6" stroke-opacity=".85" stroke-width="2"/>
+  <circle cx="{{ cx }}" cy="{{ cy }}" r="{{ r }}" fill="url(#haut-{{ u }})"/>
+  <circle cx="{{ cx }}" cy="{{ cy - r }}" r="34" fill="url(#diam-{{ u }})"/>
+  <rect x="{{ cx - 48 }}" y="{{ cy - r - 1 }}" width="96" height="2" fill="url(#trait-{{ u }})"/>
+  <circle cx="{{ cx }}" cy="{{ cy - r }}" r="3.2" fill="#fff"/>
+  {%- endif %}
+  <text x="{{ p.x }}" y="{{ p.signe_y }}" font-family="Marcellus" font-size="24" letter-spacing="8" fill="#c0a96e">{{ p.signe_maison }}</text>
+  <text font-family="Cormorant Garamond" font-weight="500" font-size="{{ p.taille }}" fill="#e9e4d6">
+    {%- for l in p.lignes %}<tspan x="{{ p.x }}" y="{{ p.premiere + loop.index0 * p.lh }}">{{ l }}</tspan>{% endfor %}
+  </text>
+  <circle cx="{{ p.x + 12 }}" cy="{{ p.marque_y - 8 }}" r="12" fill="#050608" stroke="#e9e4d6" stroke-opacity=".7" stroke-width="1.6"/>
+  <circle cx="{{ p.x + 12 }}" cy="{{ p.marque_y - 20 }}" r="2.2" fill="#fff"/>
+  <text x="{{ p.x + 38 }}" y="{{ p.marque_y }}" font-family="Marcellus" font-size="18" letter-spacing="6" fill="#9a958a">MA LUNE NOIRE</text>
+</svg>

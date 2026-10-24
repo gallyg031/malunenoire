@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """Pages HTML (spec 01, 05 §3) : entrée, révélation, sanctuaire, effacement, pages légales."""
 
+import functools
 import os
 
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 
 import lune
 from app import config, db
-from app.services import cartes
+from app.services import cartes, rendu
 from app.services import readings as rd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -103,3 +104,77 @@ def mentions(request: Request):
 def confidentialite(request: Request):
     return page(request, "page.html", entetes={"Cache-Control": PUBLIC_1J},
                 page=lune.ui()["pages"]["confidentialite"])
+
+
+# ---------------------------------------------------------------- page publique et images (spec 04 §5)
+
+PUBLIC_CARTE = "public, max-age=86400, stale-while-revalidate=604800"
+IMMUABLE = "public, max-age=31536000, immutable"
+
+
+def _public(request, share_id):
+    """(ligne, texte, signe, libellé, maison en chiffres romains) ou None."""
+    if request.app.state.corpus is None:
+        return None
+    with db.pool.connection() as conn:
+        row = rd.par_share_id(conn, share_id)
+    if row is None:
+        return None
+    signe = lune.SIGN_IDS[row["ln_sign"]]
+    texte = request.app.state.corpus.get(signe, row["ln_house"])
+    return row, texte, signe, rd.sign_label(row["ln_sign"]), rd.house_roman(row["ln_house"])
+
+
+def _cache_image(request):
+    """Un an, immuable, seulement si l'URL porte la version du texte (?v=)."""
+    return IMMUABLE if request.query_params.get("v") else PUBLIC_1J
+
+
+def _design(d, row, signe):
+    return cartes.design_effectif(d if d in cartes.DESIGNS else row["design"], signe)
+
+
+@router.get("/c/{share_id}", response_class=HTMLResponse)
+def publique(request: Request, share_id: str, d: str = ""):
+    p = _public(request, share_id)
+    if p is None:
+        return erreur(request, lune.ui()["systeme"]["404"], entetes={"Cache-Control": "public, max-age=300"})
+    row, texte, signe, libelle, romain = p
+    design = _design(d, row, signe)
+    titre = f"{libelle} — Maison {romain}" if romain else libelle
+    carte = cartes.svg(templates.env, design, signe, texte["phrase"], texte["accent"], libelle, romain)
+    return page(request, "public.html", entetes={"Cache-Control": PUBLIC_CARTE}, carte=carte,
+                titre=titre, phrase=texte["phrase"], share_id=share_id, design=design,
+                base_url=config.BASE_URL, version_texte=texte["version"])
+
+
+@functools.lru_cache(maxsize=64)
+def _png_carte(design, signe, phrase, accent, libelle, romain):
+    return rendu.carte_png(templates.env, design, signe, phrase, accent, libelle, romain)
+
+
+@functools.lru_cache(maxsize=64)
+def _png_og(design, signe, phrase, libelle, romain):
+    return rendu.og_png(templates.env, design, signe, phrase, libelle, romain)
+
+
+@router.get("/c/{share_id}/carte.png")
+def carte_png(request: Request, share_id: str, d: str = ""):
+    p = _public(request, share_id)
+    if p is None:
+        return erreur(request, lune.ui()["systeme"]["404"])
+    row, texte, signe, libelle, romain = p
+    contenu = _png_carte(_design(d, row, signe), signe, texte["phrase"], texte["accent"], libelle, romain)
+    return Response(contenu, media_type="image/png", headers={
+        "Cache-Control": _cache_image(request),
+        "Content-Disposition": f'attachment; filename="ma-lune-noire-{signe}.png"'})
+
+
+@router.get("/c/{share_id}/og.png")
+def og_png(request: Request, share_id: str, d: str = ""):
+    p = _public(request, share_id)
+    if p is None:
+        return erreur(request, lune.ui()["systeme"]["404"])
+    row, texte, signe, libelle, romain = p
+    contenu = _png_og(_design(d, row, signe), signe, texte["phrase"], libelle, romain)
+    return Response(contenu, media_type="image/png", headers={"Cache-Control": _cache_image(request)})

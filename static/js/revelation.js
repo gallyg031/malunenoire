@@ -76,7 +76,7 @@
     points.forEach((p, k) => p.classList.toggle("on", k === i));
     const d = designs[i];
     document.querySelectorAll("#enregistrer, #feuille-enregistrer").forEach((a) => {
-      a.href = `/c/${shareId}/carte.png?d=${d}`;
+      a.href = `/c/${shareId}/carte.png?d=${d}&v=${corps.dataset.version}`;
     });
     if (!memoriser) return;
     LLN.memoire.ecrire(cleDesign, d);
@@ -110,7 +110,7 @@
     const essai = new File([""], "ma-lune-noire.png", { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [essai] })) {   // l'image seulement si l'OS sait la partager
       try {
-        const r = await fetch(`/c/${shareId}/carte.png?d=${design}`);
+        const r = await fetch(`/c/${shareId}/carte.png?d=${design}&v=${corps.dataset.version}`);
         if (r.ok) donnees.files = [new File([await r.blob()], "ma-lune-noire.png", { type: "image/png" })];
       } catch (e) { /* on partage sans l'image */ }
     }

@@ -160,6 +160,10 @@
     ],
     "pack": {"nom": "Tout savoir de ta Lune Noire", "sous": "lecture + calendrier + synastrie", "prix": "15 €", "barre": "21 €"}
   },
+  "public": {
+    "faire": "FAIS LA TIENNE",
+    "titre": "{titre} · Ma Lune Noire"
+  },
   "pied": {
     "mentions": "Mentions",
     "confidentialite": "Confidentialité",

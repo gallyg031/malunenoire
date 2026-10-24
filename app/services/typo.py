@@ -68,9 +68,10 @@ def couper(texte, taille, max_w, famille="cormorant", style="normal", mesure=Non
     return [" ".join(l) for l in _glouton(mots, mesure, hi)]
 
 
-def phrase_carte(texte, tailles=(72, 65, 58), max_lignes=(4, 5), max_w=850):
-    """Taille et lignes de la phrase d'une carte (spec 04 §2) : 72 px, puis 65 si > 4 lignes,
-    puis 58 si > 5 lignes."""
+def phrase_carte(texte, tailles=(72, 65, 58), max_lignes=(3, 5), max_w=850):
+    """Taille et lignes de la phrase d'une carte (spec 04 §2) : 72 px jusqu'à 3 lignes, 65 px
+    à partir de 4 (la spec écrit « > 4 », mais son test et la maquette passent sagittaire-09,
+    4 lignes, en 65 px), 58 px au-delà de 5 lignes."""
     for i, t in enumerate(tailles):
         lignes = couper(texte, t, max_w)
         if i == len(tailles) - 1 or len(lignes) <= max_lignes[i]:

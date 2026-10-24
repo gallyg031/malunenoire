@@ -1,5 +1,4 @@
 -r requirements.txt
 pytest==8.*
 icalendar==6.*
-pillow
 playwright==1.*

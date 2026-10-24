@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block titre %}{{ ui.public.titre.format(titre=titre) }}{% endblock %}
+{% block description %}{{ phrase }}{% endblock %}
+{% block meta %}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="{{ ui.titre_site }}">
+<meta property="og:title" content="{{ titre }}">
+<meta property="og:description" content="{{ phrase }}">
+<meta property="og:url" content="{{ base_url }}/c/{{ share_id }}?d={{ design }}">
+<meta property="og:image" content="{{ base_url }}/c/{{ share_id }}/og.png?d={{ design }}&amp;v={{ version_texte }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ titre }} — {{ phrase }}">
+<meta property="og:locale" content="fr_FR">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="{{ base_url }}/c/{{ share_id }}">
+{% endblock %}
+{% block classe %}page-publique{% endblock %}
+{% block contenu %}
+<main class="publique">
+  <div class="publique-carte">{{ carte | safe }}</div>
+  <a class="bouton bouton-plein" href="/">{{ ui.public.faire }}</a>
+  <a href="/" class="marque-lien">{{ m.marque("marque marque-pied") }}</a>
+</main>
+<footer class="pied pied-public"><nav class="pied-liens"><a href="/mentions">{{ ui.pied.mentions }}</a></nav></footer>
+{% endblock %}

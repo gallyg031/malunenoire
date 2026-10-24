@@ -130,6 +130,15 @@ def trouver(conn, token):
     return row
 
 
+def par_share_id(conn, share_id):
+    """Lecture publique par share_id : seuls signe, maison et texte en sortent (spec 04 §5)."""
+    if not share_id or not SHARE_RE.match(share_id):
+        return None
+    return conn.cursor(row_factory=dict_row).execute(
+        "select share_id, ln_sign, ln_house, design from readings where share_id = %s",
+        (share_id,)).fetchone()
+
+
 def recalculer(conn, corpus, row, birth_time=None):
     """Nouveau calcul complet (heure retrouvée) : même token, même share_id."""
     t = birth_time if birth_time is not None else row["birth_time"]

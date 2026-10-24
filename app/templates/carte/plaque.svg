@@ -14,16 +14,24 @@
     <linearGradient id="trait-{{ u }}">
       <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
     </linearGradient>
-    <filter id="halo-{{ u }}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter>
+    {%- if p.ecl_r %}
+    <radialGradient id="halo-{{ u }}" gradientUnits="userSpaceOnUse" cx="{{ p.cx }}" cy="{{ p.ecl_cy }}" r="{{ p.ecl_r + 70 }}">
+      <stop offset="{{ (p.ecl_r - 30) / (p.ecl_r + 70) }}" stop-color="#e9e4d6" stop-opacity="0"/>
+      <stop offset="{{ p.ecl_r / (p.ecl_r + 70) }}" stop-color="#e9e4d6" stop-opacity=".3"/>
+      <stop offset="1" stop-color="#e9e4d6" stop-opacity="0"/>
+    </radialGradient>
+    {%- endif %}
     <filter id="lueur-{{ u }}" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4"/></filter>
   </defs>
 
   {#- fond -#}
-  {%- if p.design == "illustre" %}
+  {%- if p.design == "illustre" and p.sans_fond %}
+  {#- rendu PNG : la photo est composée à part (app/services/rendu.py) #}
+  {%- elif p.design == "illustre" %}
   <rect width="{{ p.W }}" height="{{ p.H }}" fill="#07080b"/>
   <image href="{{ p.fond_url }}" width="{{ p.W }}" height="{{ p.H }}" preserveAspectRatio="xMidYMin slice"/>
   {%- elif p.design == "eclipse" %}
-  <rect width="{{ p.W }}" height="{{ p.H }}" fill="url(#ecl-fond-{{ u }})"/>
+  {%- if not p.sans_fond %}<rect width="{{ p.W }}" height="{{ p.H }}" fill="url(#ecl-fond-{{ u }})"/>{% endif %}
   {%- else %}
   <rect width="{{ p.W }}" height="{{ p.H }}" fill="#07080b"/>
   {%- endif %}
@@ -43,7 +51,7 @@
   {#- éclipse -#}
   {%- if p.design == "eclipse" %}
   {%- set r = p.ecl_r %}{%- set cy = p.ecl_cy %}
-  <circle cx="{{ p.cx }}" cy="{{ cy }}" r="{{ r }}" fill="none" stroke="#e9e4d6" stroke-opacity=".28" stroke-width="40" filter="url(#halo-{{ u }})"/>
+  <circle cx="{{ p.cx }}" cy="{{ cy }}" r="{{ r + 70 }}" fill="url(#halo-{{ u }})"/>
   <circle cx="{{ p.cx }}" cy="{{ cy }}" r="{{ r }}" fill="#050608" stroke="#e9e4d6" stroke-opacity=".85" stroke-width="3.6"/>
   <circle cx="{{ p.cx }}" cy="{{ cy }}" r="{{ r }}" fill="url(#ecl-haut-{{ u }})"/>
   <circle cx="{{ p.cx }}" cy="{{ cy - r }}" r="61" fill="url(#diam-{{ u }})"/>
@@ -64,5 +72,10 @@
 
   {#- filet + signature -#}
   <rect x="{{ p.cx - 61 }}" y="{{ p.filet_y }}" width="122" height="3.6" fill="#c0a96e" fill-opacity=".5"/>
-  <text x="{{ p.cx + p.signature_t.esp / 2 }}" y="{{ p.sig_y }}" text-anchor="middle" font-family="Marcellus" font-size="{{ p.signature_t.taille }}" letter-spacing="{{ p.signature_t.esp }}" fill="#8a8576">FAIS LA TIENNE → MALUNENOIRE.FR</text>
+  {%- set g = p.signature %}
+  <g fill="#8a8576" font-family="Marcellus" font-size="{{ p.signature_t.taille }}" letter-spacing="{{ p.signature_t.esp }}">
+    <text x="{{ g.x1 }}" y="{{ g.y }}">{{ g.gauche }}</text>
+    <path d="M{{ g.fx }} {{ g.fy }}h33M{{ g.fx + 25 }} {{ g.fy - 7 }}l8 7l-8 7" fill="none" stroke="#8a8576" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="{{ g.x2 }}" y="{{ g.y }}">{{ g.droite }}</text>
+  </g>
 </svg>

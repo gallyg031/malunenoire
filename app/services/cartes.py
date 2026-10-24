@@ -21,6 +21,10 @@ CX = W / 2
 HAUT = MARGE + PAD_HAUT
 BAS = H - MARGE - PAD_BAS
 
+OG_W, OG_H = 1200, 630
+SIGNATURE_GAUCHE, SIGNATURE_DROITE = "FAIS LA TIENNE", "MALUNENOIRE.FR"
+FLECHE = 34                     # « → » dessinée (absente des polices)
+
 SCEAU = 58
 MARQUE = {"taille": 29, "esp": 11}
 SIGNE = {"taille": 36, "esp": 12.6}
@@ -53,6 +57,18 @@ def _marque(y_centre):
             "texte_x": x + SCEAU + 29, "texte_y": y_centre + MARQUE["taille"] * 0.35}
 
 
+def _signature(y):
+    """« FAIS LA TIENNE → MALUNENOIRE.FR » : deux textes et une flèche vectorielle, centrés."""
+    t, esp = SIGNATURE["taille"], SIGNATURE["esp"]
+    w1 = typo.largeur(SIGNATURE_GAUCHE, t, "marcellus", espacement=esp) + esp
+    w2 = typo.largeur(SIGNATURE_DROITE, t, "marcellus", espacement=esp)
+    ecart = 22
+    x = CX - (w1 + ecart + FLECHE + ecart + w2) / 2
+    fx = x + w1 + ecart
+    return {"y": y, "x1": x, "x2": fx + FLECHE + ecart, "fx": fx, "fy": y - t * 0.33,
+            "gauche": SIGNATURE_GAUCHE, "droite": SIGNATURE_DROITE}
+
+
 def _bloc_bas(taille, n):
     """Positions du bloc texte du bas (de la signature vers le haut)."""
     sig_y = BAS - 4
@@ -65,9 +81,13 @@ def _bloc_bas(taille, n):
             "signe_y": signe_y}
 
 
-def mise_en_page(design, phrase, accent, signe_label, house_roman):
-    sm = f"{signe_label.upper()} — MAISON {house_roman}" if house_roman else signe_label.upper()
-    p = {"design": design, "signe_maison": sm, "uid": secrets.token_hex(4),
+def _signe_maison(signe_label, house_roman):
+    return f"{signe_label.upper()} — MAISON {house_roman}" if house_roman else signe_label.upper()
+
+
+def mise_en_page(design, phrase, accent, signe_label, house_roman, uid=None):
+    sm = _signe_maison(signe_label, house_roman)
+    p = {"design": design, "signe_maison": sm, "uid": uid or secrets.token_hex(4),
          "W": W, "H": H, "marge": MARGE, "cx": CX, "X0": X0, "X1": X1,
          "marque_t": MARQUE, "signe_t": SIGNE, "signature_t": SIGNATURE}
     if design == "verdict":
@@ -87,13 +107,14 @@ def mise_en_page(design, phrase, accent, signe_label, house_roman):
         premiere = zone_haut + libre / 2.2 + taille * 0.8
         p.update(marque=_marque(haut_marque), signe_y=signe_y, taille=taille, lh=lh,
                  lignes=[typo.segments_accent(l, accent) for l in lignes], premiere=premiere,
-                 filet_y=bloc["filet_y"], sig_y=bloc["sig_y"],
+                 filet_y=bloc["filet_y"], sig_y=bloc["sig_y"], signature=_signature(bloc["sig_y"]),
                  etoiles=[(908, 270, 2.7, .4), (195, 1430, 2.7, .35)])
         return p
 
     taille, lignes = typo.phrase_carte(phrase)
     bloc = _bloc_bas(taille, len(lignes))
-    p.update(taille=taille, lignes=[[(l, False)] for l in lignes], **bloc)
+    p.update(taille=taille, lignes=[[(l, False)] for l in lignes], signature=_signature(bloc["sig_y"]),
+             **bloc)
     if design == "illustre":
         p["marque"] = _marque(bloc["signe_y"] - SIGNE["taille"] * 0.72 - 43 - SCEAU / 2)
     else:  # eclipse
@@ -108,10 +129,59 @@ def mise_en_page(design, phrase, accent, signe_label, house_roman):
 
 
 def svg(env, design, signe, phrase, accent, signe_label, house_roman, fond_url=None,
-        classe="carte"):
-    """Carte « version à partager » (cadre + signature), SVG inline."""
+        classe="carte", uid=None, sans_fond=False):
+    """Carte « version à partager » (cadre + signature), SVG inline. `uid` fixe : rendu
+    déterministe (PNG)."""
     design = design_effectif(design, signe)
-    p = mise_en_page(design, phrase, accent, signe_label, house_roman)
+    p = mise_en_page(design, phrase, accent, signe_label, house_roman, uid)
     p["fond_url"] = fond_url or f"/static/fonds/{signe}.webp"
     p["classe"] = classe
+    p["sans_fond"] = sans_fond
     return env.get_template("carte/plaque.svg").render(p=p)
+
+
+# ---------------------------------------------------------------- Open Graph 1200 × 630 (spec 04 §5)
+
+OG_TEXTE_X0, OG_TEXTE_X1 = 560, 1140
+
+
+def og_mise_en_page(design, phrase, signe_label, house_roman):
+    largeur = OG_TEXTE_X1 - OG_TEXTE_X0
+    taille, lignes = 56, typo.couper(phrase, 56, largeur)
+    if len(lignes) > 3:
+        taille, lignes = 48, typo.couper(phrase, 48, largeur)
+    lh = taille * 1.35
+    h_bloc = 36 + 30 + (len(lignes) - 1) * lh + taille
+    haut = (OG_H - h_bloc) / 2
+    return {"design": design, "W": OG_W, "H": OG_H, "uid": "og",
+            "signe_maison": _signe_maison(signe_label, house_roman), "taille": taille, "lh": lh,
+            "lignes": lignes, "x": OG_TEXTE_X0, "signe_y": haut + 20, "premiere": haut + 36 + 30 + taille * 0.8,
+            "marque_y": OG_H - 56, "ecl_cx": 290, "ecl_cy": OG_H / 2, "ecl_r": 150,
+            "etoiles": [(120, 110, 2.5, .5), (470, 90, 2, .4), (90, 470, 2, .35), (500, 520, 2, .3)]}
+
+
+def og_svg(env, design, signe, phrase, signe_label, house_roman, fond_url, sans_fond=False):
+    p = og_mise_en_page(design_effectif(design, signe), phrase, signe_label, house_roman)
+    p["fond_url"] = fond_url
+    p["sans_fond"] = sans_fond
+    return env.get_template("carte/og.svg").render(p=p)
+
+
+def eclipse_fond_svg():
+    """Fond seul du design éclipse (dégradé radial), pour le cache de rendu."""
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}">'
+            '<radialGradient id="f" cx="50%" cy="30%" r="72%"><stop offset="0" stop-color="#0e1017"/>'
+            '<stop offset="1" stop-color="#07080b"/></radialGradient>'
+            f'<rect width="{W}" height="{H}" fill="url(#f)"/></svg>')
+
+
+def og_fond_svg(fond_url):
+    """Fond OG illustré seul (photo recadrée + voile), pour le cache de rendu."""
+    return (f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {OG_W} {OG_H}">'
+            '<linearGradient id="v" x1="0" x2="1"><stop offset="0" stop-color="#07080b" stop-opacity=".35"/>'
+            '<stop offset=".42" stop-color="#07080b" stop-opacity=".75"/>'
+            '<stop offset="1" stop-color="#07080b" stop-opacity=".92"/></linearGradient>'
+            f'<rect width="{OG_W}" height="{OG_H}" fill="#07080b"/>'
+            f'<image href="{fond_url}" x="0" y="-330" width="{OG_W}" height="2133" '
+            'preserveAspectRatio="xMidYMid slice"/>'
+            f'<rect width="{OG_W}" height="{OG_H}" fill="url(#v)"/></svg>')

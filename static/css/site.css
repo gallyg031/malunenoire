@@ -295,3 +295,9 @@ p { margin: 0; }
   *, *::before, *::after { animation: none !important; }
   .anime.joue .seq, .anime .allume, .statut-ligne, .voile-noir, .bandeau, .diamant { transition-duration: .3s !important; transition-delay: 0s !important; }
 }
+
+/* ---------------------------------------------------------------- page publique /c/ */
+.publique { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 30px; padding: 40px 30px 10px; }
+.publique-carte { width: 300px; aspect-ratio: 1080 / 1920; border-radius: 6px; overflow: hidden; box-shadow: 0 24px 70px rgba(0, 0, 0, .6); }
+.publique .bouton { width: 262px; }
+.pied-public { padding-top: 10px; }

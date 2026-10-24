@@ -3,7 +3,7 @@
 {% block titre %}{{ ui.titre_site }}{% endblock %}
 {% block meta %}<meta name="robots" content="noindex">{% endblock %}
 {% block classe %}page-revelation{% endblock %}
-{% block data %} data-share-id="{{ r.share_id }}" data-token="{{ token }}" data-text-id="{{ r.text.id }}"{% endblock %}
+{% block data %} data-share-id="{{ r.share_id }}" data-token="{{ token }}" data-text-id="{{ r.text.id }}" data-version="{{ r.text.version }}"{% endblock %}
 {% block contenu %}
 {%- set t = r.text %}
 {#- ===== HÉRO ===== -#}
@@ -69,7 +69,7 @@
   <p class="label label-discret">{{ ui.revelation.glisse }}</p>
   <div class="carte-actions">
     <button type="button" class="bouton bouton-plein" id="partager" data-phrase="{{ t.phrase }}" data-titre="{{ ui.titre_site }}">{{ ui.revelation.partager }}</button>
-    <a class="bouton bouton-contour" id="enregistrer" href="/c/{{ r.share_id }}/carte.png?d={{ design }}" download data-event="save_image">{{ ui.revelation.enregistrer }}</a>
+    <a class="bouton bouton-contour" id="enregistrer" href="/c/{{ r.share_id }}/carte.png?d={{ design }}&amp;v={{ r.text.version }}" download data-event="save_image">{{ ui.revelation.enregistrer }}</a>
   </div>
 </section>
 
@@ -114,7 +114,7 @@
 <div class="feuille" id="feuille-partage" hidden role="dialog" aria-modal="true">
   <div class="feuille-contenu">
     <button type="button" class="bouton bouton-contour" id="feuille-copier" data-ok="{{ ui.revelation.lien_copie }}">{{ ui.revelation.copier_lien }}</button>
-    <a class="bouton bouton-contour" id="feuille-enregistrer" href="/c/{{ r.share_id }}/carte.png?d={{ design }}" download data-event="save_image">{{ ui.revelation.enregistrer }}</a>
+    <a class="bouton bouton-contour" id="feuille-enregistrer" href="/c/{{ r.share_id }}/carte.png?d={{ design }}&amp;v={{ r.text.version }}" download data-event="save_image">{{ ui.revelation.enregistrer }}</a>
     <button type="button" class="lien-discret feuille-fermer">{{ ui.revelation.fermer }}</button>
   </div>
 </div>
