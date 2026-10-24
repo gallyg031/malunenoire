@@ -15,6 +15,7 @@ Usage : python scripts/build_geo.py
 
 import csv
 import io
+import re
 import json
 import os
 import sqlite3
@@ -29,6 +30,8 @@ OUT_DB = os.path.join(ROOT, "data", "geo.sqlite")
 OUT_PAYS = os.path.join(ROOT, "data", "pays.json")
 BASE_URL = "https://download.geonames.org/export/dump/"
 FILES = ["cities5000.zip", "alternateNamesV2.zip", "countryInfo.txt", "admin1CodesASCII.txt"]
+
+ARRONDISSEMENT = re.compile(r" \d{1,2}(?:er|e|eme|ème)?(?: |$)")
 
 csv.field_size_limit(sys.maxsize if sys.maxsize < 2**31 else 2**31 - 1)
 
@@ -64,6 +67,9 @@ def load_cities():
         with z.open("cities5000.txt") as f:
             for r in read_tsv_lines(io.TextIOWrapper(f, encoding="utf-8")):
                 gid = int(r[0])
+                # quartiers et arrondissements (« Lyon 3eme », « Marseille 13eme ») : écartés
+                if r[7] == "PPLX" or ARRONDISSEMENT.search(r[1]):
+                    continue
                 cities[gid] = {
                     "id": gid, "name": r[1], "ascii": r[2],
                     "lat": float(r[4]), "lon": float(r[5]),
@@ -142,6 +148,8 @@ def build():
     rows, names = [], set()
     for gid, c in cities.items():
         fr_list = [n for _, n in fr.get(gid, [])]
+        if any(ARRONDISSEMENT.search(n) for n in fr_list):
+            continue
         fr_name = fr_list[0] if fr_list else None
         a1 = admin1.get(f"{c['country']}.{c['admin1_code']}")
         a1_name = best(fr, a1["gid"], a1["name"]) if a1 else ""

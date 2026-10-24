@@ -1,0 +1,82 @@
+{%- macro sceau(classe="sceau") -%}
+<span class="{{ classe }}" aria-hidden="true"><span class="sceau-disque"></span><span class="sceau-point"></span></span>
+{%- endmacro -%}
+
+{%- macro marque(classe="marque") -%}
+<div class="{{ classe }}">{{ sceau() }}<span class="marque-texte">{{ ui.marque }}</span></div>
+{%- endmacro -%}
+
+{%- macro signe_maison(r) -%}
+{{ r.sign_label | upper }}{% if r.house_roman %} — {{ ui.maison }} {{ r.house_roman }}{% endif %}
+{%- endmacro -%}
+
+{%- macro feedback(texte, part, no_time) -%}
+<div class="feedback" data-text-id="{{ texte.id }}" data-version="{{ texte.version }}" data-part="{{ part }}" data-no-time="{{ 'true' if no_time else 'false' }}">
+  <button type="button" class="feedback-vote" data-vote="1">{{ ui.revelation.feedback_oui }}</button>
+  <span class="feedback-point" aria-hidden="true">·</span>
+  <button type="button" class="feedback-vote" data-vote="-1">{{ ui.revelation.feedback_non }}</button>
+  <span class="feedback-merci" hidden>{{ ui.revelation.merci }}</span>
+</div>
+{%- endmacro -%}
+
+{%- macro email(token, email_masque, id) -%}
+<form class="email" data-token="{{ token }}" novalidate>
+  <div class="email-deja"{% if not email_masque %} hidden{% endif %}>
+    <span class="email-deja-texte" data-gabarit="{{ ui.email.deja }}">{{ ui.email.deja.format(email=email_masque or '') }}</span>
+    · <button type="button" class="lien-discret email-modifier">{{ ui.email.modifier }}</button>
+  </div>
+  <div class="email-saisie"{% if email_masque %} hidden{% endif %}>
+    <label class="visuellement-cache" for="email-{{ id }}">{{ ui.email.label }}</label>
+    <div class="email-ligne">
+      <input id="email-{{ id }}" class="champ email-champ" type="email" inputmode="email" autocomplete="email" placeholder="{{ ui.email.placeholder }}" maxlength="254">
+      <button type="submit" class="bouton bouton-contour email-bouton">{{ ui.email.recevoir }}</button>
+    </div>
+    <p class="email-erreur erreur" hidden>{{ ui.erreurs.email }}</p>
+    <p class="email-consentement">{{ ui.email.consentement }}</p>
+  </div>
+  <p class="email-ok" hidden>{{ ui.email.ok }}</p>
+</form>
+{%- endmacro -%}
+
+{%- macro activation(act, token, compact=False) -%}
+<section class="module{% if compact %} module-compact{% endif %}" id="activation">
+  {%- if act and act.mode == "now" %}
+  <h2 class="module-label">{{ ui.modules.en_ce_moment }}</h2>
+  <p class="module-titre">{{ ui.sanctuaire.touchee if compact else ui.modules.touchee }}</p>
+  <p class="module-texte">{{ ui.modules.actif_detail.format(phrase=act.phrase, jusqu=act.jusqu) }}</p>
+  {%- elif act %}
+  <h2 class="module-label">{{ ui.modules.prochaine }}</h2>
+  <p class="module-titre">{{ (ui.sanctuaire.prochaine if compact else ui.modules.prochaine_titre).format(date=act.date) }}</p>
+  <p class="module-texte">{{ ui.modules.prochaine_detail.format(phrase=act.phrase, fenetre=act.fenetre[:1].lower() ~ act.fenetre[1:]) }}</p>
+  {%- else %}
+  <h2 class="module-label">{{ ui.modules.prochaine }}</h2>
+  <p class="module-titre">{{ ui.modules.aucune }}</p>
+  {%- endif %}
+  {%- if act and not compact %}
+  <a class="lien-grave" href="/api/reading/{{ token }}/next.ics" download data-event="ics_click">{{ ui.modules.agenda }}</a>
+  {%- endif %}
+  {%- if not compact %}
+  <a class="lien-grave" href="#calendrier">{{ ui.modules.douze_mois }}</a>
+  {%- endif %}
+</section>
+{%- endmacro -%}
+
+{%- macro synastrie(compact=False) -%}
+<section class="module{% if compact %} module-compact{% endif %}">
+  <h2 class="module-label">{{ ui.modules.synastrie_label }}</h2>
+  <p class="module-titre">{{ ui.modules.synastrie_titre }}</p>
+  {%- if not compact %}<p class="module-texte">{{ ui.modules.synastrie_texte }}</p>{% endif %}
+  <span class="lien-grave lien-inactif" aria-disabled="true">{{ ui.modules.comparer }} <span class="pastille">{{ ui.modules.bientot }}</span></span>
+</section>
+{%- endmacro -%}
+
+{%- macro pied(token=None) -%}
+<footer class="pied">
+  <div class="filet-vertical" aria-hidden="true"></div>
+  {{ marque("marque marque-pied") }}
+  <nav class="pied-liens">
+    <a href="/mentions">{{ ui.pied.mentions }}</a> · <a href="/confidentialite">{{ ui.pied.confidentialite }}</a>
+    {%- if token %} · <a href="/l/{{ token }}/effacer" rel="nofollow">{{ ui.pied.effacer }}</a>{% endif %}
+  </nav>
+</footer>
+{%- endmacro -%}

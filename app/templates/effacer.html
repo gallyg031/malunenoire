@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block classe %}page-systeme{% endblock %}
+{% block contenu %}
+<main class="systeme">
+  {{ m.marque() }}
+  <div class="systeme-centre" id="effacer" data-token="{{ token }}">
+    <p class="systeme-texte" id="effacer-texte">{{ ui.systeme.effacer_texte }}</p>
+    <div class="systeme-actions" id="effacer-actions">
+      <button type="button" class="bouton bouton-contour" id="effacer-bouton">{{ ui.systeme.effacer_bouton }}</button>
+      <a class="lien-discret" href="/l/{{ token }}">{{ ui.systeme.garder }}</a>
+    </div>
+    <p class="systeme-texte" id="efface" hidden>{{ ui.systeme.efface }}</p>
+    <p class="erreur" id="effacer-erreur" hidden>{{ ui.systeme.hors_ligne }}</p>
+  </div>
+</main>
+{% endblock %}
+{% block scripts %}<script src="/static/js/commun.js?v={{ version }}" defer></script>{% endblock %}

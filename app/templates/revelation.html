@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block titre %}{{ ui.titre_site }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block classe %}page-revelation{% endblock %}
+{% block data %} data-share-id="{{ r.share_id }}" data-token="{{ token }}" data-text-id="{{ r.text.id }}"{% endblock %}
+{% block contenu %}
+{%- set t = r.text %}
+{#- ===== HÉRO ===== -#}
+<header class="hero" id="hero">
+  {{ m.marque("marque hero-marque seq seq-couronne") }}
+  <div class="etoiles" aria-hidden="true"><i class="e1 seq seq-couronne"></i><i class="e2 seq seq-couronne"></i><i class="e3 seq seq-couronne"></i><i class="e4 seq seq-couronne"></i><i class="e5 seq seq-couronne"></i></div>
+  <div class="eclipse seq seq-disque" aria-hidden="true">
+    <i class="eclipse-disque"></i>
+    <i class="eclipse-couronne seq seq-couronne"></i>
+    <i class="eclipse-eclat seq seq-diamant"></i>
+    <span class="diamant diamant-hero seq seq-diamant"><i class="diamant-lueur"></i><i class="diamant-h"></i><i class="diamant-v"></i><i class="diamant-point"></i></span>
+  </div>
+  <p class="hero-signe seq seq-meta">{{ m.signe_maison(r) }}</p>
+  <h1 class="hero-phrase seq seq-phrase">{{ t.phrase }}</h1>
+  <div class="seq seq-phrase hero-sous">
+    {%- if r.no_time %}
+    <p class="note-heure">{% if r.sign_changes_today %}{{ ui.revelation.change_signe.format(signe=r.sign_label) }}{% else %}{{ ui.revelation.sans_heure }}{% endif %}</p>
+    <button type="button" class="lien-grave" id="ouvrir-heure">{{ ui.revelation.retrouve_heure }}</button>
+    <form class="heure-inline" id="heure-inline" hidden novalidate>
+      <label class="visuellement-cache" for="heure-retrouvee">{{ ui.entree.label_heure }}</label>
+      <input id="heure-retrouvee" class="champ" placeholder="{{ ui.entree.ph_heure }}" inputmode="numeric" maxlength="5">
+      <button type="submit" class="bouton bouton-contour">{{ ui.revelation.recalculer }}</button>
+      <p class="erreur" hidden>{{ ui.entree.err_heure }}</p>
+    </form>
+    {%- endif %}
+    {{ m.feedback(t, "phrase", r.no_time) }}
+  </div>
+  <div class="descends seq seq-hint" aria-hidden="true"><span>{{ ui.revelation.descends }}</span><i></i></div>
+</header>
+
+{#- ===== BANDEAU ÉPINGLÉ ===== -#}
+<div class="bandeau" id="bandeau">
+  <a class="bandeau-sceau" href="/l/{{ token }}/sanctuaire" aria-label="{{ ui.sanctuaire.titre }}" data-event="sanctuaire_open">{{ m.sceau("sceau sceau-22") }}</a>
+  <div class="bandeau-textes"><span class="bandeau-marque">{{ ui.marque }}</span><span class="bandeau-signe">{{ r.sign_label | upper }}{% if r.house_roman %} — {{ r.house_roman }}{% endif %}</span></div>
+</div>
+
+{#- ===== LES ÉCLATS ===== -#}
+<section class="eclats">
+  {%- if fond_mini %}<div class="eclats-fond" id="eclats-fond" data-fond="{{ fond_mini }}" aria-hidden="true"></div><div class="eclats-voile" id="eclats-voile" aria-hidden="true"></div>{% endif %}
+  {%- for e in t.eclats %}
+  <div class="eclat allume">
+    <p class="eclat-num" aria-hidden="true">{{ ["I", "II", "III"][loop.index0] }}</p>
+    <p class="eclat-texte">{{ e }}</p>
+    {{ m.feedback(t, "eclat" ~ loop.index, r.no_time) }}
+  </div>
+  {%- endfor %}
+  <div class="ouverture allume">
+    <i class="filet-lie" aria-hidden="true"></i>
+    <p class="ouverture-texte">{{ t.ouverture }}</p>
+    {{ m.feedback(t, "ouverture", r.no_time) }}
+  </div>
+</section>
+
+{#- ===== LA CARTE ===== -#}
+<section class="carte-zone allume" id="carte">
+  <p class="label">{{ ui.revelation.carte_label }}</p>
+  <div class="carrousel" id="carrousel" tabindex="0">
+    {%- for d, svg in cartes %}
+    <div class="carrousel-item" data-design="{{ d }}" aria-label="{{ ui.designs[d] }}">{{ svg | safe }}</div>
+    {%- endfor %}
+  </div>
+  <div class="points" id="points" aria-hidden="true">{% for d, _ in cartes %}<i data-i="{{ loop.index0 }}"></i>{% endfor %}</div>
+  <p class="label label-discret">{{ ui.revelation.glisse }}</p>
+  <div class="carte-actions">
+    <button type="button" class="bouton bouton-plein" id="partager" data-phrase="{{ t.phrase }}" data-titre="{{ ui.titre_site }}">{{ ui.revelation.partager }}</button>
+    <a class="bouton bouton-contour" id="enregistrer" href="/c/{{ r.share_id }}/carte.png?d={{ design }}" download data-event="save_image">{{ ui.revelation.enregistrer }}</a>
+  </div>
+</section>
+
+{#- ===== MODULES ===== -#}
+<div class="modules">
+  {{ m.activation(r.activation_now or r.activation_next, token) }}
+  {{ m.email(token, r.email, "activation") }}
+  {{ m.synastrie() }}
+
+  <section class="module module-laiton">
+    <h2 class="module-label">{{ ui.modules.lecture_label }}</h2>
+    <p class="module-titre module-titre-italique">{{ ui.modules.lecture_titre }}</p>
+    <p class="module-corps">{{ ui.modules.lecture_texte }}</p>
+    <p class="module-texte">{{ ui.modules.lecture_note }}</p>
+    <button type="button" class="bouton bouton-laiton ouvre-bientot">{{ ui.modules.lecture_bouton }}</button>
+  </section>
+  <section class="module module-laiton" id="calendrier">
+    <h2 class="module-label">{{ ui.modules.calendrier_label }}</h2>
+    <p class="module-titre module-titre-italique">{{ ui.modules.calendrier_titre }}</p>
+    <p class="module-corps">{{ ui.modules.calendrier_texte }}</p>
+    <p class="module-texte">{{ ui.modules.calendrier_note }}</p>
+    <button type="button" class="bouton bouton-laiton ouvre-bientot">{{ ui.modules.calendrier_bouton }}</button>
+  </section>
+  <section class="module module-bundle">
+    <h2 class="module-label">{{ ui.modules.bundle_label }}</h2>
+    <p class="module-titre module-titre-italique">{{ ui.modules.bundle_titre }}</p>
+    <button type="button" class="bouton bouton-plein ouvre-bientot">{{ ui.modules.bundle_bouton }} <s class="barre">{{ ui.modules.bundle_barre }}</s></button>
+  </section>
+
+  <section class="module module-lien">
+    <p class="module-titre">{{ ui.modules.lien_titre }}</p>
+    <p class="module-texte">{{ ui.modules.lien_texte }}</p>
+    <button type="button" class="bouton bouton-contour" id="copier-lien" data-ok="{{ ui.revelation.lien_copie }}">{{ ui.modules.copier }}</button>
+    <p class="module-texte">{{ ui.modules.lien_email }}</p>
+    {{ m.email(token, r.email, "lien") }}
+  </section>
+</div>
+
+{{ m.pied(token) }}
+
+{#- ===== FEUILLES ===== -#}
+<div class="feuille" id="feuille-partage" hidden role="dialog" aria-modal="true">
+  <div class="feuille-contenu">
+    <button type="button" class="bouton bouton-contour" id="feuille-copier" data-ok="{{ ui.revelation.lien_copie }}">{{ ui.revelation.copier_lien }}</button>
+    <a class="bouton bouton-contour" id="feuille-enregistrer" href="/c/{{ r.share_id }}/carte.png?d={{ design }}" download data-event="save_image">{{ ui.revelation.enregistrer }}</a>
+    <button type="button" class="lien-discret feuille-fermer">{{ ui.revelation.fermer }}</button>
+  </div>
+</div>
+<div class="feuille" id="feuille-bientot" hidden role="dialog" aria-modal="true">
+  <div class="feuille-contenu">
+    <p class="feuille-texte">{{ ui.modules.bientot_feuille }}</p>
+    {{ m.email(token, r.email, "bientot") }}
+    <button type="button" class="lien-discret feuille-fermer">{{ ui.revelation.fermer }}</button>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/commun.js?v={{ version }}" defer></script>
+<script src="/static/js/revelation.js?v={{ version }}" defer></script>{% endblock %}

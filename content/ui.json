@@ -39,5 +39,164 @@
     "non_achete": "Ce calendrier n'est pas encore débloqué.",
     "interne": "Quelque chose s'est mal passé de notre côté. Réessaie dans un instant.",
     "aucune_activation": "Aucune activation à venir dans les prochains mois."
+  },
+  "marque": "MA LUNE NOIRE",
+  "titre_site": "Ma Lune Noire",
+  "signature": "Là où tes peurs touchent ta lumière",
+  "brouillon": "BROUILLON",
+  "maison": "MAISON",
+  "points": {
+    "lune_noire": "Lune Noire",
+    "priape": "Priape",
+    "soumission": "point de soumission",
+    "affirmation": "point d'affirmation"
+  },
+  "designs": {
+    "illustre": "Fond illustré",
+    "eclipse": "Éclipse",
+    "verdict": "Le verdict"
+  },
+  "entree": {
+    "description": "La part de toi que personne ne voit. Trois champs, une phrase : la tienne.",
+    "promesse": "La part de toi que personne ne voit.",
+    "sous_titre": "Trois champs. Une phrase. La tienne.",
+    "label_date": "NÉ·E LE",
+    "ph_date": "12 mars 1991",
+    "label_heure": "À",
+    "ph_heure": "04:37",
+    "label_lieu": "À",
+    "ph_lieu": "Lyon, France",
+    "sans_heure": "sans l'heure",
+    "lien_sans_heure": "je ne connais pas mon heure",
+    "lien_avec_heure": "j'ai retrouvé mon heure",
+    "note_sans_heure": "Il n'y aura pas de maison — ta phrase sera un peu moins ajustée.",
+    "reveler": "RÉVÉLER",
+    "err_date_inexistante": "Cette date n'existe pas.",
+    "err_date_vide": "Il nous faut une date.",
+    "err_lieu": "Choisis une ville dans la liste.",
+    "err_heure": "L'heure ressemble à 04:37."
+  },
+  "calcul": {
+    "lignes": ["Nous lisons le ciel de ta naissance.", "Nous cherchons ta Lune Noire.", "Nous lisons la maison où elle tombe."],
+    "ligne3_sans_heure": "Nous lisons le signe où elle se tient.",
+    "releve": "LUNE NOIRE",
+    "trouvee": "trouvée.",
+    "pied": "NE QUITTE PAS — LE CIEL S'ALIGNE",
+    "lent": "Le ciel met du temps. Réessaie dans un instant.",
+    "reessayer": "RÉESSAYER"
+  },
+  "revelation": {
+    "descends": "DESCENDS",
+    "sans_heure": "Lu sans ton heure de naissance.",
+    "retrouve_heure": "J'AI RETROUVÉ MON HEURE →",
+    "change_signe": "Ce jour-là, ta Lune Noire change de signe dans la journée. Sans ton heure, nous te lisons en {signe}.",
+    "recalculer": "RECALCULER",
+    "feedback_oui": "ÇA ME RESSEMBLE",
+    "feedback_non": "PAS VRAIMENT",
+    "merci": "MERCI",
+    "carte_label": "TA CARTE — CHOISIS TON DESIGN",
+    "glisse": "GLISSE POUR CHANGER",
+    "partager": "PARTAGER",
+    "enregistrer": "ENREGISTRER L'IMAGE",
+    "copier_lien": "Copier le lien",
+    "fermer": "Fermer",
+    "lien_copie": "Lien copié."
+  },
+  "modules": {
+    "en_ce_moment": "EN CE MOMENT",
+    "touchee": "Ta Lune Noire est touchée en ce moment.",
+    "actif_detail": "{phrase}. {jusqu}. Reviens quand ça tire.",
+    "prochaine": "TA PROCHAINE ACTIVATION",
+    "prochaine_titre": "Ta prochaine activation : {date}.",
+    "prochaine_detail": "{phrase}, {fenetre}.",
+    "aucune": "Rien ne touche ta Lune Noire dans les prochains mois.",
+    "agenda": "AJOUTER À MON AGENDA →",
+    "douze_mois": "ET LES 12 PROCHAINS MOIS ? →",
+    "synastrie_label": "SYNASTRIE D'OMBRE",
+    "synastrie_titre": "Ton ombre face à la sienne.",
+    "synastrie_texte": "Compare ta Lune Noire à celle de quelqu'un — ce que vous réveillez l'un chez l'autre.",
+    "comparer": "COMPARER →",
+    "bientot": "BIENTÔT",
+    "lecture_label": "LA LECTURE COMPLÈTE",
+    "lecture_titre": "Tu viens de lire le seuil. Voici la pièce.",
+    "lecture_texte": "Ce que tu protèges, ce que tu provoques, ce que tu n'oses pas demander — et d'où ça vient. L'histoire entière, jusqu'au mythe qui la fonde.",
+    "lecture_note": "Un document nocturne, à toi, à garder.",
+    "lecture_bouton": "RECEVOIR LA LECTURE — 7 €",
+    "calendrier_label": "LE CALENDRIER",
+    "calendrier_titre": "Tu sais maintenant où ça appuie. Voici quand.",
+    "calendrier_texte": "Les jours où ta Lune Noire sera touchée, sur les douze prochains mois — ce qui s'ouvre, ce qui se rejoue, quand ça se referme. Pour ne plus être pris·e de court.",
+    "calendrier_note": "Tes dates, à toi, sur douze mois.",
+    "calendrier_bouton": "RECEVOIR LE CALENDRIER — 5 €",
+    "bundle_label": "LES DEUX, ENSEMBLE",
+    "bundle_titre": "L'histoire entière, et ses dates.",
+    "bundle_bouton": "RECEVOIR LES DEUX — 10 €",
+    "bundle_barre": "12 €",
+    "bientot_feuille": "Bientôt disponible. Laisse ton e-mail pour être prévenu·e.",
+    "lien_titre": "Ce lien est ta Lune Noire.",
+    "lien_texte": "Pas de compte, pas de mot de passe : garde-le. Il s'enrichira.",
+    "copier": "COPIER MON LIEN",
+    "lien_email": "Recevoir mon lien par e-mail"
+  },
+  "email": {
+    "label": "Ton e-mail",
+    "placeholder": "ton@email.fr",
+    "recevoir": "RECEVOIR",
+    "consentement": "Ton lien, un rappel avant chaque activation, une nouvelle lune par mois. Rien d'autre, et tu te désinscris en un clic.",
+    "ok": "C'est noté.",
+    "deja": "Rappels activés pour {email}",
+    "modifier": "modifier"
+  },
+  "sanctuaire": {
+    "titre": "Ta Lune Noire",
+    "voir_carte": "VOIR MA CARTE →",
+    "touchee": "Touchée en ce moment.",
+    "prochaine": "Prochaine activation : {date}.",
+    "bibliotheque": "LA BIBLIOTHÈQUE",
+    "produits": [
+      {"nom": "La lecture complète", "sous": "l'histoire entière, jusqu'au mythe", "prix": "7 €"},
+      {"nom": "Le calendrier", "sous": "tes douze prochains mois", "prix": "5 €"},
+      {"nom": "La synastrie d'ombre complète", "sous": "vous deux, sans complaisance ni fatalité", "prix": "9 €"},
+      {"nom": "Comprendre ta Lune Noire", "sous": "le guide, écrit à la main", "prix": "9 €"}
+    ],
+    "pack": {"nom": "Tout savoir de ta Lune Noire", "sous": "lecture + calendrier + synastrie", "prix": "15 €", "barre": "21 €"}
+  },
+  "pied": {
+    "mentions": "Mentions",
+    "confidentialite": "Confidentialité",
+    "effacer": "Effacer ma Lune Noire"
+  },
+  "systeme": {
+    "404": "Il n'y a rien ici.",
+    "faire": "Faire ma Lune Noire →",
+    "token_inconnu": "Ce lien ne mène à aucune Lune Noire. Il a peut-être été effacé.",
+    "effacer_texte": "Effacer ta Lune Noire supprime ta date, ton heure, ton lieu, ton e-mail et ton lien. C'est définitif.",
+    "effacer_bouton": "EFFACER",
+    "garder": "garder",
+    "efface": "C'est fait. Il ne reste rien.",
+    "desinscription": "Tu ne recevras plus rien. Ton lien reste valable.",
+    "hors_ligne": "Le ciel ne répond pas. Réessaie dans un instant."
+  },
+  "pages": {
+    "mentions": {
+      "titre": "Mentions",
+      "sections": [
+        {"titre": "Éditrice", "texte": ["[À FOURNIR — nom ou raison sociale, statut, adresse, SIRET, contact.]", "Directrice de la publication : Constance."]},
+        {"titre": "Hébergement", "texte": ["Application : Google Cloud Run (Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Irlande), région Europe (Belgique).", "Base de données : Neon (Neon Inc.), région Europe (Francfort).", "Diffusion : Cloudflare (Cloudflare Inc.)."]},
+        {"titre": "Calculs", "texte": ["Toutes les positions sont calculées avec la Swiss Ephemeris (Astrodienst AG), sous licence AGPL-3.0.", "Ta Lune Noire est la Lune Noire « naturelle » (apogée interpolé de Dieter Koch), en maisons Koch et nœuds vrais.", "Le code du site est publié sous licence AGPL-3.0 : github.com/gallyg031/malunenoire. Les textes et les illustrations ne le sont pas : tous droits réservés."]},
+        {"titre": "Données géographiques", "texte": ["Villes : GeoNames (geonames.org), licence CC BY 4.0. Recherche complémentaire : © les contributeurs d'OpenStreetMap (Nominatim), licence ODbL."]},
+        {"titre": "Polices", "texte": ["Cormorant Garamond (Christian Thalmann) et Marcellus (Astigmatic), licence SIL Open Font License 1.1."]}
+      ]
+    },
+    "confidentialite": {
+      "titre": "Confidentialité",
+      "sections": [
+        {"titre": "Ce que nous gardons", "texte": ["Ta date, ton heure (si tu la donnes) et ton lieu de naissance, le fuseau de ton navigateur, et ton e-mail si tu choisis de le laisser. Ces données servent à une seule chose : calculer et te montrer ta Lune Noire."]},
+        {"titre": "Pourquoi", "texte": ["Pour te rendre le service que tu demandes (ta lecture et ton lien personnel). Pour les e-mails, seulement avec ton accord, que tu retires en un clic."]},
+        {"titre": "Combien de temps", "texte": ["Jusqu'à ce que tu effaces ta Lune Noire. Sans e-mail enregistré, ta lecture est supprimée 24 mois après ta dernière visite. Avec un e-mail, tant que ton inscription est active."]},
+        {"titre": "Sans compte, sans traceur", "texte": ["Pas de compte, pas de cookie, pas de publicité, aucun traceur tiers. La mesure d'audience, si elle existe, se fait sans cookie (Cloudflare Web Analytics). Les avis « ça me ressemble » sont anonymes : ils ne sont pas reliés à ta lecture."]},
+        {"titre": "Qui y a accès", "texte": ["Nos sous-traitants, dans l'Union européenne quand c'est possible : Google Cloud (hébergement), Neon (base de données), Resend (e-mails), Cloudflare (diffusion), et Stripe pour les paiements quand ils ouvriront."]},
+        {"titre": "Tes droits", "texte": ["Effacer : un lien « Effacer ma Lune Noire » en bas de ta page supprime tout, immédiatement. Te désinscrire : un lien dans chaque e-mail. Accéder : ta page contient tout ce que nous savons. Pour toute question : [À FOURNIR — adresse de contact]. Tu peux aussi saisir la CNIL (cnil.fr)."]}
+      ]
+    }
   }
 }

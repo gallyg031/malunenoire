@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block titre %}{{ page.titre }} · {{ ui.titre_site }}{% endblock %}
+{% block classe %}page-texte{% endblock %}
+{% block contenu %}
+<main class="texte-legal">
+  <a href="/" class="marque-lien">{{ m.marque() }}</a>
+  <h1>{{ page.titre }}</h1>
+  {%- for s in page.sections %}
+  <h2>{{ s.titre }}</h2>
+  {%- for para in s.texte %}<p>{{ para }}</p>{% endfor %}
+  {%- endfor %}
+</main>
+{{ m.pied() }}
+{% endblock %}

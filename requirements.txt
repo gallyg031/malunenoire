@@ -7,3 +7,4 @@ psycopg[binary,pool]==3.3.6
 timezonefinder==9.2.0
 httpx==0.28.1
 tzdata
+fonttools[woff]==4.*

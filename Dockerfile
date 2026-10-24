@@ -21,7 +21,7 @@ RUN mkdir -p data && python scripts/build_geo.py && rm -rf data/geonames
 FROM deps AS dev
 COPY requirements-dev.txt /tmp/
 RUN cp -r /install/. /usr/local/ \
-    && pip install --no-cache-dir --root-user-action=ignore -r /tmp/requirements-dev.txt
+    && pip install --no-cache-dir --root-user-action=ignore -r /tmp/requirements-dev.txt     && playwright install --with-deps chromium
 COPY --from=geo /src/data/geo.sqlite /opt/geo/geo.sqlite
 # éphémérides dans l'image, comme en production (le montage /w est lent sous Windows)
 COPY data/ephe/ /opt/ephe/
@@ -40,6 +40,8 @@ COPY data/ephe/ data/ephe/
 # corpus : content/ui.json (public) + content/textes/ (privé, présent seulement sur le poste
 # de déploiement) ; un corpus invalide bloque le build (spec 06 §3)
 COPY content/ content/
+# polices (OFL) + fonds illustrés (privés, générés par scripts/build_fonds.py sur le poste)
+COPY static/ static/
 COPY scripts/valider_corpus.py scripts/__init__.py scripts/
 # golden_prive.json (thèmes privés) est exclu par .dockerignore : vérifié en local avant push.
 COPY tests/engine/golden*.json tests/engine/

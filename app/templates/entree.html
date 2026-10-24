@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block classe %}page-entree{% endblock %}
+{% block contenu %}
+<div class="etoiles" aria-hidden="true"><i class="e1"></i><i class="e2"></i><i class="e3"></i><i class="e4"></i></div>
+
+{#- ===== L'ENTRÉE ===== -#}
+<main class="entree" id="entree">
+  {{ m.marque() }}
+  <div class="ressort ressort-12"></div>
+  <h1 class="promesse">{{ ui.entree.promesse }}</h1>
+  <p class="sous-titre">{{ ui.entree.sous_titre }}</p>
+  <div class="ressort ressort-14"></div>
+
+  <form id="formulaire" class="formulaire" novalidate autocomplete="off"
+        data-err-inexistante="{{ ui.entree.err_date_inexistante }}" data-err-vide="{{ ui.entree.err_date_vide }}"
+        data-err-lieu="{{ ui.entree.err_lieu }}" data-err-heure="{{ ui.entree.err_heure }}"
+        data-lien-sans="{{ ui.entree.lien_sans_heure }}" data-lien-avec="{{ ui.entree.lien_avec_heure }}">
+    <div class="ligne-champs">
+      <div class="groupe groupe-date">
+        <label class="gravure" for="date">{{ ui.entree.label_date }}</label>
+        <input id="date" name="date" class="champ" placeholder="{{ ui.entree.ph_date }}" inputmode="text" autocomplete="bday">
+        <p class="erreur" id="err-date" hidden></p>
+      </div>
+      <div class="groupe groupe-heure">
+        <label class="gravure" for="heure">{{ ui.entree.label_heure }}</label>
+        <input id="heure" name="heure" class="champ" placeholder="{{ ui.entree.ph_heure }}" inputmode="numeric" maxlength="5">
+        <div class="champ champ-sans-heure" id="sans-heure" hidden>{{ ui.entree.sans_heure }}</div>
+        <p class="erreur" id="err-heure" hidden></p>
+      </div>
+    </div>
+    <button type="button" class="lien-discret lien-heure" id="bascule-heure">{{ ui.entree.lien_sans_heure }}</button>
+    <p class="note-sans-heure" id="note-sans-heure" hidden>{{ ui.entree.note_sans_heure }}</p>
+
+    <div class="groupe groupe-lieu">
+      <label class="gravure" for="lieu">{{ ui.entree.label_lieu }}</label>
+      <input id="lieu" name="lieu" class="champ" placeholder="{{ ui.entree.ph_lieu }}" role="combobox"
+             aria-autocomplete="list" aria-expanded="false" aria-controls="suggestions" maxlength="80">
+      <ul class="suggestions" id="suggestions" role="listbox" hidden></ul>
+      <p class="erreur" id="err-lieu" hidden></p>
+    </div>
+
+    <div class="espace-30"></div>
+    <button type="submit" class="bouton bouton-plein" id="reveler" disabled>{{ ui.entree.reveler }}</button>
+  </form>
+  <div class="ressort ressort-05"></div>
+  <nav class="pied-entree"><a href="/mentions">{{ ui.pied.mentions }}</a> · <a href="/confidentialite">{{ ui.pied.confidentialite }}</a></nav>
+</main>
+
+{#- ===== LE CALCUL (même URL, état transitoire) ===== -#}
+<section class="calcul" id="calcul" hidden aria-live="polite"
+         data-ligne3-sans="{{ ui.calcul.ligne3_sans_heure }}"
+         data-maison="{{ ui.maison }}">
+  <div class="etoiles etoiles-respirent" aria-hidden="true"><i class="e1"></i><i class="e2"></i><i class="e3"></i><i class="e4"></i><i class="e5"></i></div>
+  {{ m.marque() }}
+  <div class="ressort ressort-10"></div>
+  <p class="coordonnees" id="coordonnees"></p>
+  <div class="anneau" aria-hidden="true">
+    <div class="anneau-progression" id="anneau"></div>
+    <div class="anneau-masque"></div>
+    <div class="anneau-lune"></div>
+    <div class="anneau-halo"></div>
+    <div class="anneau-orbite"><div class="anneau-orbe"></div></div>
+    <div class="diamant" id="diamant"><i class="diamant-lueur"></i><i class="diamant-h"></i><i class="diamant-v"></i><i class="diamant-point"></i></div>
+  </div>
+  <p class="releve"><span>{{ ui.calcul.releve }}</span> · <span id="releve-deg">0</span>° <span id="releve-signe">· · ·</span></p>
+  <div class="statut">
+    <p class="statut-ligne" data-i="0">{{ ui.calcul.lignes[0] }}</p>
+    <p class="statut-ligne" data-i="1">{{ ui.calcul.lignes[1] }}</p>
+    <p class="statut-ligne" data-i="2" id="ligne3">{{ ui.calcul.lignes[2] }}</p>
+    <div class="statut-ligne statut-resolution" data-i="3">
+      <p class="resolution-signe" id="resolution"></p>
+      <p class="resolution-trouvee">{{ ui.calcul.trouvee }}</p>
+    </div>
+    <div class="statut-ligne statut-lent" data-i="4">
+      <p class="statut-lent-texte" id="calcul-message">{{ ui.calcul.lent }}</p>
+      <button type="button" class="bouton bouton-contour" id="reessayer">{{ ui.calcul.reessayer }}</button>
+    </div>
+  </div>
+  <div class="ressort ressort-13"></div>
+  <p class="calcul-pied">{{ ui.calcul.pied }}</p>
+</section>
+<div class="voile-noir" id="voile" aria-hidden="true"></div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/commun.js?v={{ version }}" defer></script>
+<script src="/static/js/entree.js?v={{ version }}" defer></script>{% endblock %}

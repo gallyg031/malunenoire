@@ -16,13 +16,16 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "engine"))
 sys.path.insert(0, ROOT)
 
 import selftest  # noqa: E402
-from app import config, db  # noqa: E402
+import lune  # noqa: E402
+from app import config, db, web  # noqa: E402
 from app.api import routes  # noqa: E402
 from app.services import corpus as corpus_mod  # noqa: E402
 from app.services import geocode as geo  # noqa: E402
@@ -75,6 +78,8 @@ async def lifespan(app):
 app = FastAPI(title="Ma Lune Noire", lifespan=lifespan, docs_url=None, redoc_url=None,
               openapi_url=None)
 app.include_router(routes.router)
+app.include_router(web.router)
+app.mount("/static", StaticFiles(directory=os.path.join(ROOT, "static")), name="static")
 
 CHAMP_MESSAGE = {"date": "date", "time": "heure", "lat": "lieu", "lon": "lieu", "name": "lieu",
                  "place": "lieu", "tz": "fuseau", "tz_user": "fuseau", "email": "email"}
@@ -93,6 +98,16 @@ async def validation(request: Request, exc: RequestValidationError):
     return routes.erreur(400, "validation", cle)
 
 
+@app.exception_handler(StarletteHTTPException)
+async def http_erreur(request: Request, exc: StarletteHTTPException):
+    if request.url.path.startswith("/api/"):
+        code = "introuvable" if exc.status_code == 404 else "validation"
+        return routes.erreur(exc.status_code, code)
+    if exc.status_code == 404:
+        return web.erreur(request, lune.ui()["systeme"]["404"])
+    return web.erreur(request, lune.ui()["systeme"]["hors_ligne"], exc.status_code)
+
+
 @app.exception_handler(Exception)
 async def interne(request: Request, exc: Exception):
     log.exception("erreur interne")
@@ -101,11 +116,18 @@ async def interne(request: Request, exc: Exception):
 
 @app.middleware("http")
 async def entetes(request: Request, call_next):
-    if request.url.path.startswith("/api/reading") and \
-            getattr(request.app.state, "corpus", None) is None and state["golden"]:
-        return routes.erreur(500, "interne")
+    chemin = request.url.path
+    if getattr(request.app.state, "corpus", None) is None and state["golden"]:
+        if chemin.startswith("/api/reading"):
+            return routes.erreur(500, "interne")
+        if chemin.startswith("/l/"):
+            return web.erreur(request, lune.ui()["systeme"]["hors_ligne"], 500)
     resp = await call_next(request)
     h = resp.headers
+    if chemin.startswith("/static/"):
+        immuable = chemin.startswith("/static/fonts/") or "v=" in request.url.query
+        h["Cache-Control"] = ("public, max-age=31536000, immutable" if immuable
+                              else "public, max-age=86400")
     h.setdefault("X-Content-Type-Options", "nosniff")
     h.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
     h.setdefault("Content-Security-Policy",

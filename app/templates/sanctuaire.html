@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block classe %}page-sanctuaire{% endblock %}
+{% block data %} data-token="{{ token }}"{% endblock %}
+{% block contenu %}
+<main class="sanctuaire">
+  {{ m.marque() }}
+  <h1 class="sanctuaire-titre">{{ ui.sanctuaire.titre }}</h1>
+  <p class="sanctuaire-signe">{{ m.signe_maison(r) }}</p>
+
+  <div class="sanctuaire-carte">
+    <a class="vignette" href="/l/{{ token }}#carte">{{ vignette | safe }}</a>
+    <div class="sanctuaire-carte-texte">
+      <p class="citation">« {{ r.text.phrase }} »</p>
+      <a class="lien-grave" href="/l/{{ token }}#carte">{{ ui.sanctuaire.voir_carte }}</a>
+    </div>
+  </div>
+
+  <div class="modules modules-compacts">
+    {{ m.activation(r.activation_now or r.activation_next, token, compact=True) }}
+    {{ m.synastrie(compact=True) }}
+  </div>
+
+  <p class="label sanctuaire-biblio">{{ ui.sanctuaire.bibliotheque }}</p>
+  <ul class="bibliotheque">
+    {%- for p in ui.sanctuaire.produits %}
+    <li><button type="button" class="biblio-ligne ouvre-bientot"><span class="biblio-noms"><span class="biblio-nom">{{ p.nom }}</span><span class="biblio-sous">{{ p.sous }}</span></span><span class="biblio-prix">{{ p.prix }}</span></button></li>
+    {%- endfor %}
+    <li><button type="button" class="biblio-ligne biblio-pack ouvre-bientot"><span class="biblio-noms"><span class="biblio-nom">{{ ui.sanctuaire.pack.nom }}</span><span class="biblio-sous">{{ ui.sanctuaire.pack.sous }}</span></span><span class="biblio-prix">{{ ui.sanctuaire.pack.prix }} <s>{{ ui.sanctuaire.pack.barre }}</s></span></button></li>
+  </ul>
+</main>
+{{ m.pied(token) }}
+<div class="feuille" id="feuille-bientot" hidden role="dialog" aria-modal="true">
+  <div class="feuille-contenu">
+    <p class="feuille-texte">{{ ui.modules.bientot_feuille }}</p>
+    {{ m.email(token, r.email, "bientot") }}
+    <button type="button" class="lien-discret feuille-fermer">{{ ui.revelation.fermer }}</button>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}<script src="/static/js/commun.js?v={{ version }}" defer></script>{% endblock %}

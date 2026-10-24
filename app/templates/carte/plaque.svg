@@ -1,0 +1,68 @@
+{#- Carte « plaque », version à partager (spec 04 §2-3), unités 1080 × 1920. -#}
+{%- set u = p.uid -%}
+<svg xmlns="http://www.w3.org/2000/svg" class="{{ p.classe }}" viewBox="0 0 {{ p.W }} {{ p.H }}" role="img" aria-label="{{ p.signe_maison }} — {% for l in p.lignes %}{% for s, a in l %}{{ s }}{% endfor %} {% endfor %}">
+  <defs>
+    <radialGradient id="ecl-fond-{{ u }}" cx="50%" cy="30%" r="72%">
+      <stop offset="0" stop-color="#0e1017"/><stop offset="1" stop-color="#07080b"/>
+    </radialGradient>
+    <radialGradient id="ecl-haut-{{ u }}" cx="50%" cy="-10%" r="42%">
+      <stop offset="0" stop-color="#fffcf0" stop-opacity=".28"/><stop offset="1" stop-color="#fffcf0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="diam-{{ u }}">
+      <stop offset="0" stop-color="#fff" stop-opacity=".5"/><stop offset=".45" stop-color="#fffaeb" stop-opacity=".1"/><stop offset=".7" stop-color="#fff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="trait-{{ u }}">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset=".5" stop-color="#fff" stop-opacity=".6"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="halo-{{ u }}" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="lueur-{{ u }}" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4"/></filter>
+  </defs>
+
+  {#- fond -#}
+  {%- if p.design == "illustre" %}
+  <rect width="{{ p.W }}" height="{{ p.H }}" fill="#07080b"/>
+  <image href="{{ p.fond_url }}" width="{{ p.W }}" height="{{ p.H }}" preserveAspectRatio="xMidYMin slice"/>
+  {%- elif p.design == "eclipse" %}
+  <rect width="{{ p.W }}" height="{{ p.H }}" fill="url(#ecl-fond-{{ u }})"/>
+  {%- else %}
+  <rect width="{{ p.W }}" height="{{ p.H }}" fill="#07080b"/>
+  {%- endif %}
+  {%- for x, y, r, o in p.etoiles or [] %}
+  <circle cx="{{ x }}" cy="{{ y }}" r="{{ r }}" fill="#e9e4d6" opacity="{{ o }}"/>
+  {%- endfor %}
+
+  {#- cadre -#}
+  <rect x="{{ p.marge }}" y="{{ p.marge }}" width="{{ p.W - 2 * p.marge }}" height="{{ p.H - 2 * p.marge }}" fill="none" stroke="#c0a96e" stroke-opacity=".5" stroke-width="3.6"/>
+
+  {#- sceau + marque -#}
+  {%- set m = p.marque %}
+  <circle cx="{{ m.sceau_cx }}" cy="{{ m.sceau_cy }}" r="{{ m.sceau_r }}" fill="#050608" stroke="#e9e4d6" stroke-opacity=".7" stroke-width="3.6"/>
+  <circle cx="{{ m.sceau_cx }}" cy="{{ m.sceau_cy - m.sceau_r }}" r="4" fill="#fff"/>
+  <text x="{{ m.texte_x }}" y="{{ m.texte_y }}" font-family="Marcellus" font-size="{{ p.marque_t.taille }}" letter-spacing="{{ p.marque_t.esp }}" fill="#b6b0a2">MA LUNE NOIRE</text>
+
+  {#- éclipse -#}
+  {%- if p.design == "eclipse" %}
+  {%- set r = p.ecl_r %}{%- set cy = p.ecl_cy %}
+  <circle cx="{{ p.cx }}" cy="{{ cy }}" r="{{ r }}" fill="none" stroke="#e9e4d6" stroke-opacity=".28" stroke-width="40" filter="url(#halo-{{ u }})"/>
+  <circle cx="{{ p.cx }}" cy="{{ cy }}" r="{{ r }}" fill="#050608" stroke="#e9e4d6" stroke-opacity=".85" stroke-width="3.6"/>
+  <circle cx="{{ p.cx }}" cy="{{ cy }}" r="{{ r }}" fill="url(#ecl-haut-{{ u }})"/>
+  <circle cx="{{ p.cx }}" cy="{{ cy - r }}" r="61" fill="url(#diam-{{ u }})"/>
+  <rect x="{{ p.cx - 86.5 }}" y="{{ cy - r - 1.8 }}" width="173" height="3.6" fill="url(#trait-{{ u }})"/>
+  <circle cx="{{ p.cx }}" cy="{{ cy - r }}" r="9" fill="#fff" filter="url(#lueur-{{ u }})"/>
+  <circle cx="{{ p.cx }}" cy="{{ cy - r }}" r="5.5" fill="#fff"/>
+  {%- endif %}
+
+  {#- signe — maison -#}
+  <text x="{{ p.cx + p.signe_t.esp / 2 }}" y="{{ p.signe_y }}" text-anchor="middle" font-family="Marcellus" font-size="{{ p.signe_t.taille }}" letter-spacing="{{ p.signe_t.esp }}" fill="#c0a96e">{{ p.signe_maison }}</text>
+
+  {#- phrase -#}
+  <text text-anchor="middle" font-family="Cormorant Garamond" font-weight="500" font-size="{{ p.taille }}" fill="#e9e4d6">
+    {%- for l in p.lignes %}
+    <tspan x="{{ p.cx }}" y="{{ p.premiere + loop.index0 * p.lh }}">{% for s, accent in l %}{% if accent %}<tspan font-style="italic" fill="#a8505e">{{ s }}</tspan>{% else %}{{ s }}{% endif %}{% endfor %}</tspan>
+    {%- endfor %}
+  </text>
+
+  {#- filet + signature -#}
+  <rect x="{{ p.cx - 61 }}" y="{{ p.filet_y }}" width="122" height="3.6" fill="#c0a96e" fill-opacity=".5"/>
+  <text x="{{ p.cx + p.signature_t.esp / 2 }}" y="{{ p.sig_y }}" text-anchor="middle" font-family="Marcellus" font-size="{{ p.signature_t.taille }}" letter-spacing="{{ p.signature_t.esp }}" fill="#8a8576">FAIS LA TIENNE → MALUNENOIRE.FR</text>
+</svg>

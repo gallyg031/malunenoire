@@ -18,6 +18,10 @@ NOMINATIM_URL = "https://nominatim.openstreetmap.org/search"
 USER_AGENT = "MaLuneNoire/1.0 (contact@malunenoire.fr)"
 MAX_Q = 80
 LIMIT = 5
+# Public francophone : à population égale, ces pays passent devant (×20), pour que
+# « L » propose Lyon avant Lagos (spec 07 §5).
+FRANCOPHONES = ("FR", "BE", "CH", "LU", "MC", "CA")
+POIDS_FRANCOPHONE = 20
 
 _local = threading.local()
 _pays = None
@@ -74,8 +78,9 @@ def search_local(q):
         """select c.name, c.fr_name, c.country, c.admin1, c.lat, c.lon, c.tz
            from (select distinct city_id from names where norm >= ? and norm < ?) m
            join cities c on c.id = m.city_id
-           order by c.pop desc limit ?""",
-        (n, n + "￿", LIMIT)).fetchall()
+           order by c.pop * (case when c.country in (?,?,?,?,?,?) then ? else 1 end) desc
+           limit ?""",
+        (n, n + "\uffff", *FRANCOPHONES, POIDS_FRANCOPHONE, LIMIT)).fetchall()
     return _disambiguate([_result(fr_name or name, cc, a1, lat, lon, tz)
                           for name, fr_name, cc, a1, lat, lon, tz in rows])
 
