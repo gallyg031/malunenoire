@@ -28,6 +28,16 @@ def ping():
         return conn.execute("select 1").fetchone()[0] == 1
 
 
+def limite(conn, key, nombre, fenetre_s):
+    """Compte une demande pour `key` dans la fenêtre fixe courante ; False au-delà de `nombre`."""
+    row = conn.execute(
+        """insert into ratelimit (key, bucket, count)
+           values (%s, to_timestamp(floor(extract(epoch from now()) / %s) * %s), 1)
+           on conflict (key, bucket) do update set count = ratelimit.count + 1
+           returning count""", (key, fenetre_s, fenetre_s)).fetchone()
+    return row[0] <= nombre
+
+
 class GeoCache:
     """Table geocache (spec 05 §5), entrées valables 30 jours."""
 

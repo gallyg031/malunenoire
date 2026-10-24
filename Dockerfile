@@ -37,10 +37,15 @@ COPY engine/ engine/
 COPY app/ app/
 COPY db/ db/
 COPY data/ephe/ data/ephe/
+# corpus : content/ui.json (public) + content/textes/ (privé, présent seulement sur le poste
+# de déploiement) ; un corpus invalide bloque le build (spec 06 §3)
+COPY content/ content/
+COPY scripts/valider_corpus.py scripts/__init__.py scripts/
 # golden_prive.json (thèmes privés) est exclu par .dockerignore : vérifié en local avant push.
 COPY tests/engine/golden*.json tests/engine/
 COPY --from=geo /src/data/geo.sqlite /src/data/pays.json data/
-RUN useradd --system --uid 10001 lune && python engine/selftest.py
+RUN useradd --system --uid 10001 lune && python engine/selftest.py \
+    && python scripts/valider_corpus.py --strict | tail -2
 USER lune
 EXPOSE 8080
 CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT} --workers 1 --proxy-headers --forwarded-allow-ips='*'"]

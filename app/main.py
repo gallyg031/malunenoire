@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 """
-Ma Lune Noire — application FastAPI (phase 0 : socle).
+Ma Lune Noire — application FastAPI.
 
-Au démarrage : éphémérides, self-test allégé (thèmes de référence), migrations.
-Si le test doré échoue, l'application refuse de démarrer.
+Au démarrage : éphémérides, self-test allégé (thèmes de référence), migrations,
+corpus. Si le test doré échoue, l'application refuse de démarrer ; si le corpus
+est invalide, /health répond 500.
 """
 
 import logging
 import os
+import re
 import sys
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -19,25 +22,47 @@ sys.path.insert(0, os.path.join(ROOT, "engine"))
 sys.path.insert(0, ROOT)
 
 import selftest  # noqa: E402
-from app import db  # noqa: E402
+from app import config, db  # noqa: E402
+from app.api import routes  # noqa: E402
+from app.services import corpus as corpus_mod  # noqa: E402
 from app.services import geocode as geo  # noqa: E402
 
-ENV = os.environ.get("ENV", "local")
-EPHE_PATH = os.environ.get("EPHE_PATH", os.path.join(ROOT, "data", "ephe"))
-DATABASE_URL = os.environ.get("DATABASE_URL")
+ENV = config.ENV
+DATABASE_URL = config.DATABASE_URL
 
 log = logging.getLogger("malunenoire")
-state = {"golden": False, "db": DATABASE_URL is not None}
+state = {"golden": False, "db": DATABASE_URL is not None, "corpus": False}
+
+
+class MasqueTokens(logging.Filter):
+    """Jamais de token dans un log (spec 05 §1) : /l/<token>, /api/reading/<token>, désinscription."""
+    MOTIF = re.compile(r"/(l|api/reading|desinscription)/[A-Za-z0-9_-]{8,}")
+
+    def filter(self, record):
+        if record.args:
+            record.args = tuple(self.MOTIF.sub(r"/\1/•", a) if isinstance(a, str) else a
+                                for a in record.args)
+        record.msg = self.MOTIF.sub(r"/\1/•", str(record.msg))
+        return True
+
+
+logging.getLogger("uvicorn.access").addFilter(MasqueTokens())
 
 
 @asynccontextmanager
 async def lifespan(app):
-    fails = selftest.run(EPHE_PATH, leger=True)
+    fails = selftest.run(config.EPHE_PATH, leger=True)
     if fails:
         for f in fails:
             log.critical("self-test : %s", f)
         raise RuntimeError("test doré en échec : démarrage refusé")
     state["golden"] = True
+    try:
+        app.state.corpus = corpus_mod.Corpus(prod=config.PROD)
+        state["corpus"] = True
+    except corpus_mod.CorpusError as e:
+        log.critical("%s", e)
+        app.state.corpus, state["corpus"] = None, False
     if DATABASE_URL:
         from db.migrate import migrate
         for name in migrate(DATABASE_URL):
@@ -47,35 +72,74 @@ async def lifespan(app):
     db.close_pool()
 
 
-app = FastAPI(title="Ma Lune Noire", lifespan=lifespan, docs_url=None, redoc_url=None)
+app = FastAPI(title="Ma Lune Noire", lifespan=lifespan, docs_url=None, redoc_url=None,
+              openapi_url=None)
+app.include_router(routes.router)
+
+CHAMP_MESSAGE = {"date": "date", "time": "heure", "lat": "lieu", "lon": "lieu", "name": "lieu",
+                 "place": "lieu", "tz": "fuseau", "tz_user": "fuseau", "email": "email"}
 
 
-def error(status, code, message):
-    return JSONResponse({"ok": False, "error": code, "message": message}, status_code=status)
+@app.exception_handler(RequestValidationError)
+async def validation(request: Request, exc: RequestValidationError):
+    cle = "validation"
+    for err in exc.errors():
+        for part in reversed(err.get("loc", ())):
+            if part in CHAMP_MESSAGE:
+                cle = CHAMP_MESSAGE[part]
+                break
+        if cle != "validation":
+            break
+    return routes.erreur(400, "validation", cle)
+
+
+@app.exception_handler(Exception)
+async def interne(request: Request, exc: Exception):
+    log.exception("erreur interne")
+    return routes.erreur(500, "interne")
+
+
+@app.middleware("http")
+async def entetes(request: Request, call_next):
+    if request.url.path.startswith("/api/reading") and \
+            getattr(request.app.state, "corpus", None) is None and state["golden"]:
+        return routes.erreur(500, "interne")
+    resp = await call_next(request)
+    h = resp.headers
+    h.setdefault("X-Content-Type-Options", "nosniff")
+    h.setdefault("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+    h.setdefault("Content-Security-Policy",
+                 "default-src 'self'; img-src 'self' data:; script-src 'self'; "
+                 "style-src 'self'; frame-ancestors 'none'; base-uri 'self'")
+    if ENV != "local":
+        h.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return resp
 
 
 @app.get("/health")   # Cloud Run réserve /healthz sur ses URL : /health est la sonde en production
 @app.get("/healthz")
 def healthz():
-    checks = {"golden": state["golden"], "db": None}
+    checks = {"golden": state["golden"], "corpus": state["corpus"], "db": None}
     if state["db"]:
         try:
             checks["db"] = db.ping()
         except Exception:
             log.exception("base injoignable")
             checks["db"] = False
-    ok = checks["golden"] and checks["db"] is not False
+    ok = checks["golden"] and checks["corpus"] and checks["db"] is not False
     if ENV != "local" and not state["db"]:
         ok = False
     return JSONResponse({"ok": ok, "env": ENV, **checks}, status_code=200 if ok else 500)
 
 
 @app.get("/api/geocode")
-def api_geocode(q: str = Query("", max_length=geo.MAX_Q)):
-    cache = db.GeoCache() if db.pool is not None else None
-    try:
-        results = geo.geocode(q, cache=cache)
-    except Exception:
-        log.exception("géocodage")
-        return error(500, "geocode", "La recherche de lieu ne répond pas. Réessaie dans un instant.")
+def api_geocode(request: Request, q: str = Query("", max_length=geo.MAX_Q)):
+    cache = None
+    if db.pool is not None:
+        cache = db.GeoCache()
+        with db.pool.connection() as conn:
+            if not db.limite(conn, routes.rd.hash_key("geocode", routes.ip(request)),
+                             *routes.LIM_GEOCODE):
+                return routes.erreur(429, "trop")
+    results = geo.geocode(q, cache=cache)
     return JSONResponse(results, headers={"Cache-Control": "public, max-age=86400"})

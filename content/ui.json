@@ -20,5 +20,24 @@
     "trigone": "{corps} trigone à ta Lune Noire",
     "sextile": "{corps} sextile à ta Lune Noire",
     "ln_ingress": "Ta Lune Noire en transit entre en {signe}"
+  },
+  "affichage": {
+    "jusqu_au": "Jusqu'au {date}",
+    "encore_des_mois": "Pendant encore des mois",
+    "fenetre": "Du {debut} au {fin}",
+    "fenetre_ouverte": "À partir du {debut}"
+  },
+  "erreurs": {
+    "validation": "Quelque chose ne va pas dans ce qui a été saisi.",
+    "date": "Cette date de naissance n'est pas valide.",
+    "heure": "L'heure doit s'écrire HH:MM.",
+    "lieu": "Ce lieu n'est pas valide.",
+    "fuseau": "Ce fuseau horaire est inconnu.",
+    "introuvable": "Aucune Lune Noire à cette adresse.",
+    "trop": "Trop de demandes. Réessaie dans un moment.",
+    "email": "Cette adresse e-mail n'est pas valide.",
+    "non_achete": "Ce calendrier n'est pas encore débloqué.",
+    "interne": "Quelque chose s'est mal passé de notre côté. Réessaie dans un instant.",
+    "aucune_activation": "Aucune activation à venir dans les prochains mois."
   }
 }

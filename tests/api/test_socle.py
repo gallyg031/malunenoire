@@ -4,20 +4,10 @@
 import os
 
 import pytest
-from fastapi.testclient import TestClient
 
 from app.services import geocode as geo
 
 TEST_DB = os.environ.get("TEST_DATABASE_URL")
-
-
-@pytest.fixture
-def client(monkeypatch):
-    import app.main as main
-    monkeypatch.setattr(main, "DATABASE_URL", TEST_DB)
-    monkeypatch.setitem(main.state, "db", TEST_DB is not None)
-    with TestClient(main.app) as c:
-        yield c
 
 
 @pytest.mark.parametrize("path", ["/healthz", "/health"])
@@ -48,7 +38,8 @@ def test_geocode_court_sans_nominatim(client, monkeypatch):
 
 
 def test_geocode_longueur(client):
-    assert client.get("/api/geocode", params={"q": "x" * 81}).status_code == 422
+    r = client.get("/api/geocode", params={"q": "x" * 81})
+    assert r.status_code == 400 and r.json()["ok"] is False
 
 
 def test_nominatim_repli_et_cache(monkeypatch):
