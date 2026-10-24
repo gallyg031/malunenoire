@@ -1,4 +1,5 @@
-# Spec 06 §8 : push sur main → tests → image → préprod ; tag v* → production.
+# Spec 06 §8, adapté : chaque push → tests ; tag v* → image → production.
+# La préproduction arrivera avec Cloudflare (preprod.malunenoire.fr).
 # Variables du dépôt : GCP_PROJECT, GCP_WIF_PROVIDER, GCP_SA (Workload Identity, sans clé JSON).
 name: ci
 
@@ -17,14 +18,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Thème doré privé
-        run: printf '%s' "$GOLDEN_PRIVE" > tests/engine/golden_prive.json
-        env: {GOLDEN_PRIVE: "${{ secrets.GOLDEN_PRIVE }}"}
-      - run: docker compose run --rm -e CI=1 tests
+      - run: docker compose run --rm tests
 
   deploy:
     needs: tests
-    if: github.event_name == 'push'
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions: {contents: read, id-token: write}
     steps:
@@ -34,17 +32,18 @@ jobs:
           workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
           service_account: ${{ vars.GCP_SA }}
       - uses: google-github-actions/setup-gcloud@v2
-      - run: printf '%s' "$GOLDEN_PRIVE" > tests/engine/golden_prive.json
-        env: {GOLDEN_PRIVE: "${{ secrets.GOLDEN_PRIVE }}"}
       - run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
       - run: |
-          docker build -t $IMAGE:${{ github.sha }} .
-          docker push $IMAGE:${{ github.sha }}
+          docker build -t $IMAGE:${{ github.ref_name }} .
+          docker push $IMAGE:${{ github.ref_name }}
       - name: Cloud Run
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then SVC=malunenoire; ENVN=prod; else SVC=malunenoire-preprod; ENVN=preprod; fi
-          gcloud run deploy $SVC --image $IMAGE:${{ github.sha }} --region $REGION \
-            --cpu 1 --memory 512Mi --concurrency 40 --min-instances 0 \
-            --set-env-vars ENV=$ENVN \
-            --set-secrets DATABASE_URL=database-url-$ENVN:latest \
+          gcloud run deploy malunenoire --image $IMAGE:${{ github.ref_name }} --region $REGION \
+            --cpu 1 --memory 512Mi --concurrency 40 --min-instances 0 --max-instances 4 \
+            --set-env-vars ENV=prod \
+            --set-secrets DATABASE_URL=database-url-prod:latest \
             --allow-unauthenticated --quiet
+      - name: Sonde
+        run: |
+          URL=$(gcloud run services describe malunenoire --region $REGION --format 'value(status.url)')
+          curl -fsS "$URL/health"

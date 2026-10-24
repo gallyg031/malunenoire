@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tests dorés (spec 07 §1).
 
-Les thèmes validés par Constance sont dans golden_prive.json (hors dépôt public,
-injecté en CI) ; le dépôt public ne porte qu'une référence neutre (J2000).
+Les thèmes validés par Constance sont dans golden_prive.json, qui ne quitte jamais
+son poste (vérifié avant chaque push par un hook local) ; le dépôt public ne porte
+qu'une référence neutre (J2000, Paris).
 """
 
 import os
@@ -15,8 +16,7 @@ import astro
 import selftest
 
 PRIVE = selftest.load_prive()
-SANS_PRIVE = pytest.mark.skipif(not PRIVE and not os.environ.get("CI"),
-                                reason="golden_prive.json absent (fichier privé)")
+SANS_PRIVE = pytest.mark.skipif(not PRIVE, reason="golden_prive.json absent (fichier privé)")
 
 
 def test_reference_j2000():
@@ -27,7 +27,6 @@ def test_reference_j2000():
 
 @SANS_PRIVE
 def test_golden_prive():
-    assert PRIVE, "golden_prive.json manquant : secret CI non injecté"
     fails = []
     for nom, g in PRIVE.items():
         assert g.get("valide_par_constance"), f"{nom} non validé par Constance"

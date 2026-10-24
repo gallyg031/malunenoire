@@ -32,7 +32,7 @@ COPY engine/ engine/
 COPY app/ app/
 COPY db/ db/
 COPY data/ephe/ data/ephe/
-# golden_prive.json (thèmes validés, privé) est inclus s'il est présent : le self-test du build le vérifie.
+# golden_prive.json (thèmes privés) est exclu par .dockerignore : vérifié en local avant push.
 COPY tests/engine/golden*.json tests/engine/
 COPY --from=geo /src/data/geo.sqlite /src/data/pays.json data/
 RUN useradd --system --uid 10001 lune && python engine/selftest.py

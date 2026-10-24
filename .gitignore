@@ -23,5 +23,5 @@ CLAUDE.md
 engine/SKILL.md
 engine/methods.md
 engine/wheel.py
-# Thèmes dorés validés par Constance : injectés en CI par secret
+# Thèmes dorés validés par Constance : ne quittent jamais son poste
 tests/engine/golden_prive.json

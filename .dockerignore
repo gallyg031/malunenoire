@@ -6,3 +6,7 @@ design
 data/geonames
 local
 specs
+tests/engine/golden_prive.json
+engine/SKILL.md
+engine/methods.md
+engine/wheel.py
