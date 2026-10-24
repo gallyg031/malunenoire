@@ -1,0 +1,27 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+data/geonames/
+data/geo.sqlite
+.pytest_cache/
+local/
+compose.override.yaml
+
+# sécurité : transcriptions privées, où qu elles soient
+transcriptions/
+**/transcriptions/
+
+# Hors dépôt public (spec 06 §1 : textes et illustrations, tous droits réservés)
+design/
+prive/
+transcriptions/
+content/textes/
+static/fonds/
+specs/
+CLAUDE.md
+engine/SKILL.md
+engine/methods.md
+engine/wheel.py
+# Thèmes dorés validés par Constance : injectés en CI par secret
+tests/engine/golden_prive.json

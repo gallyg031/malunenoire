@@ -1,0 +1,39 @@
+{
+  "note": "Koch, nœuds vrais, Lune Noire corrigée (SE_INTP_APOG), Swiss Ephemeris. Référence neutre : Paris, époque J2000 (1er janvier 2000, 12:00 UTC), instantané de non-régression.",
+  "j2000": {
+    "args": [
+      2000,
+      1,
+      1,
+      13,
+      0,
+      "Europe/Paris"
+    ],
+    "lat": 48.8566,
+    "lon": 2.3522,
+    "utc_offset_min": 60,
+    "ln_lon": 259.163937,
+    "fmt": "19°10' Sagittaire",
+    "maison": 8,
+    "croix": {
+      "priape": {
+        "lon": 79.163937,
+        "fmt": "19°10' Gémeaux",
+        "maison": 2
+      },
+      "affirmation": {
+        "lon": 169.163937,
+        "fmt": "19°10' Vierge",
+        "maison": 6
+      },
+      "soumission": {
+        "lon": 349.163937,
+        "fmt": "19°10' Poissons",
+        "maison": 12
+      }
+    },
+    "intensite": 4.3004,
+    "asc": "26°46' Bélier",
+    "mc": "11°47' Capricorne"
+  }
+}

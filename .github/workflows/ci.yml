@@ -1,0 +1,50 @@
+# Spec 06 §8 : push sur main → tests → image → préprod ; tag v* → production.
+# Variables du dépôt : GCP_PROJECT, GCP_WIF_PROVIDER, GCP_SA (Workload Identity, sans clé JSON).
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+env:
+  REGION: europe-west1
+  IMAGE: europe-west1-docker.pkg.dev/${{ vars.GCP_PROJECT }}/malunenoire/app
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Thème doré privé
+        run: printf '%s' "$GOLDEN_PRIVE" > tests/engine/golden_prive.json
+        env: {GOLDEN_PRIVE: "${{ secrets.GOLDEN_PRIVE }}"}
+      - run: docker compose run --rm -e CI=1 tests
+
+  deploy:
+    needs: tests
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions: {contents: read, id-token: write}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GCP_WIF_PROVIDER }}
+          service_account: ${{ vars.GCP_SA }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - run: printf '%s' "$GOLDEN_PRIVE" > tests/engine/golden_prive.json
+        env: {GOLDEN_PRIVE: "${{ secrets.GOLDEN_PRIVE }}"}
+      - run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev --quiet
+      - run: |
+          docker build -t $IMAGE:${{ github.sha }} .
+          docker push $IMAGE:${{ github.sha }}
+      - name: Cloud Run
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then SVC=malunenoire; ENVN=prod; else SVC=malunenoire-preprod; ENVN=preprod; fi
+          gcloud run deploy $SVC --image $IMAGE:${{ github.sha }} --region $REGION \
+            --cpu 1 --memory 512Mi --concurrency 40 --min-instances 0 \
+            --set-env-vars ENV=$ENVN \
+            --set-secrets DATABASE_URL=database-url-$ENVN:latest \
+            --allow-unauthenticated --quiet
