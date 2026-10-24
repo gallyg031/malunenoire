@@ -137,7 +137,7 @@ def contenu(conn, item, row):
         if nm.touches:
             ligne = t["new_moon_point"].format(date=fr(nm.when), point=lune.ui()["points"][nm.nearest_point])
         elif nm.house:
-            ligne = t["new_moon_maison"].format(date=fr(nm.when), signe=signe, maison=nm.house)
+            ligne = t["new_moon_maison"].format(date=fr(nm.when), signe=signe, maison=rd.house_roman(nm.house))
         else:
             ligne = t["new_moon_signe"].format(date=fr(nm.when), signe=signe)
         return t["new_moon_sujet"].format(signe=signe), [ligne, t["new_moon_fin"]]
