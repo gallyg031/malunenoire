@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block titre %}{{ ui.achats.lecture_titre }} · {{ ui.titre_site }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block classe %}page-texte{% endblock %}
+{% block contenu %}
+<main class="texte-legal lecture">
+  <a href="/l/{{ token }}" class="marque-lien">{{ m.marque() }}</a>
+  <h1>{{ ui.achats.lecture_titre }}</h1>
+  <p class="sanctuaire-signe">{{ m.signe_maison(r) }}</p>
+  <p class="citation">« {{ r.text.phrase }} »</p>
+
+  <h2>{{ ui.achats.lecture_croix }}</h2>
+  <ul class="croix">
+    {%- for p in ("lune_noire", "priape", "affirmation", "soumission") %}
+    <li><span class="croix-point">{{ ui.points[p] }}</span><span class="croix-pos">{{ croix[p] }}</span></li>
+    {%- endfor %}
+  </ul>
+
+  {%- if complet %}
+  {%- for cle in ("priape", "soumission", "affirmation", "aspects", "mythe") if complet[cle] %}
+  <h2>{{ ui.achats.sections[cle] }}</h2>
+  {%- for para in complet[cle].split("\n\n") %}<p>{{ para }}</p>{% endfor %}
+  {%- endfor %}
+  {%- else %}
+  <p class="lecture-attente">{{ ui.achats.lecture_attente }}</p>
+  {%- endif %}
+  <p><a class="lien-grave" href="/l/{{ token }}">{{ ui.achats.retour }}</a></p>
+</main>
+{{ m.pied(token) }}
+{% endblock %}

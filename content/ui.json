@@ -38,7 +38,8 @@
     "email": "Cette adresse e-mail n'est pas valide.",
     "non_achete": "Ce calendrier n'est pas encore débloqué.",
     "interne": "Quelque chose s'est mal passé de notre côté. Réessaie dans un instant.",
-    "aucune_activation": "Aucune activation à venir dans les prochains mois."
+    "aucune_activation": "Aucune activation à venir dans les prochains mois.",
+    "paiement_indisponible": "Le paiement n'est pas encore ouvert. Laisse ton e-mail pour être prévenu·e."
   },
   "marque": "MA LUNE NOIRE",
   "titre_site": "Ma Lune Noire",
@@ -174,8 +175,26 @@
     "new_moon_maison": "Le {date}, la nouvelle lune se lève en {signe}, dans ta maison {maison}.",
     "new_moon_signe": "Le {date}, la nouvelle lune se lève en {signe}.",
     "new_moon_fin": "Un cycle commence. Regarde ce qui demande à naître.",
+    "purchase_sujet": {"lecture": "Ta lecture complète", "calendrier": "Ton calendrier", "bundle": "Ta lecture complète et ton calendrier"},
+    "purchase_corps": ["Merci.", "Tout est sur ta page, à garder : ton lien reste ton accès, sans compte ni mot de passe."],
     "alerte_sujet": "File d'e-mails saturée",
     "alerte_corps": ["Plus de 90 e-mails attendent leur envoi depuis trois jours.", "Il faut changer de fournisseur ou de palier (spec 06 §5)."]
+  },
+  "achats": {
+    "merci": "Merci. Ton achat apparaît ici dès que le paiement est confirmé — quelques secondes, parfois une minute.",
+    "voir_calendrier": "VOIR MON CALENDRIER →",
+    "voir_lecture": "LIRE MA LECTURE COMPLÈTE →",
+    "calendrier_titre": "Tes douze prochains mois",
+    "calendrier_sous": "Les jours où ta Lune Noire est touchée.",
+    "calendrier_ics": "TOUT AJOUTER À MON AGENDA →",
+    "calendrier_vide": "Rien ne touche ta Lune Noire sur ces douze mois.",
+    "exact": "Exact le {date}",
+    "lecture_titre": "Ta lecture complète",
+    "lecture_attente": "Ta lecture complète est en cours d'écriture. Tu la recevras par e-mail dès qu'elle sera prête.",
+    "lecture_croix": "TA CROIX",
+    "sections": {"priape": "Priape", "soumission": "Le point de soumission", "affirmation": "Le point d'affirmation", "aspects": "Les aspects", "mythe": "Le mythe"},
+    "retour": "← RETOUR À MA LUNE NOIRE",
+    "non_achete": "Cette page s'ouvre avec l'achat correspondant."
   },
   "desinscription": {
     "titre": "Désinscription",

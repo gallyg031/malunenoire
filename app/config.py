@@ -22,3 +22,10 @@ RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
 EMAIL_REDIRECT = os.environ.get("EMAIL_REDIRECT", "")
 ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "")
 EMAIL_PLAFOND = int(os.environ.get("EMAIL_PLAFOND", "90"))     # Resend gratuit : 100/jour
+
+# Phase 1.5 — paiement (désactivé tant que PAIEMENT=on n'est pas posé : prix, compte Stripe et
+# mentions légales à valider par Constance). Prix en centimes (D13, indicatifs).
+PAIEMENT_ACTIF = os.environ.get("PAIEMENT", "off") == "on"
+STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
+STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+PRIX = {"lecture": 700, "calendrier": 500, "bundle": 1000}

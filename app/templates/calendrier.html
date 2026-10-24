@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% import "_macros.html" as m %}
+{% block titre %}{{ ui.achats.calendrier_titre }} · {{ ui.titre_site }}{% endblock %}
+{% block meta %}<meta name="robots" content="noindex">{% endblock %}
+{% block classe %}page-sanctuaire{% endblock %}
+{% block contenu %}
+<main class="sanctuaire">
+  <a href="/l/{{ token }}" class="marque-lien">{{ m.marque() }}</a>
+  <h1 class="sanctuaire-titre">{{ ui.achats.calendrier_titre }}</h1>
+  <p class="sanctuaire-signe">{{ m.signe_maison(r) }}</p>
+  <p class="module-texte calendrier-sous">{{ ui.achats.calendrier_sous }}</p>
+  {%- if mois %}
+  <a class="lien-grave calendrier-ics" href="/api/reading/{{ token }}/calendrier.ics" download>{{ ui.achats.calendrier_ics }}</a>
+  {%- for titre, lignes in mois %}
+  <p class="label calendrier-mois">{{ titre | upper }}</p>
+  <ul class="calendrier">
+    {%- for l in lignes %}
+    <li class="calendrier-ligne"><span class="calendrier-date">{{ l.date }}</span><span class="calendrier-texte"><span class="calendrier-phrase">{{ l.phrase }}</span><span class="biblio-sous">{{ l.fenetre }}</span></span></li>
+    {%- endfor %}
+  </ul>
+  {%- endfor %}
+  {%- else %}
+  <p class="module-titre">{{ ui.achats.calendrier_vide }}</p>
+  {%- endif %}
+  <a class="lien-grave calendrier-retour" href="/l/{{ token }}">{{ ui.achats.retour }}</a>
+</main>
+{{ m.pied(token) }}
+{% endblock %}

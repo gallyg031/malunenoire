@@ -75,6 +75,7 @@
 
 {#- ===== MODULES ===== -#}
 <div class="modules">
+  {%- if achat_ok %}<p class="achat-merci">{{ ui.achats.merci }}</p>{% endif %}
   {{ m.activation(r.activation_now or r.activation_next, token) }}
   {{ m.email(token, r.email, "activation") }}
   {{ m.synastrie() }}
@@ -84,19 +85,29 @@
     <p class="module-titre module-titre-italique">{{ ui.modules.lecture_titre }}</p>
     <p class="module-corps">{{ ui.modules.lecture_texte }}</p>
     <p class="module-texte">{{ ui.modules.lecture_note }}</p>
-    <button type="button" class="bouton bouton-laiton ouvre-bientot">{{ ui.modules.lecture_bouton }}</button>
+    {%- if "lecture" in r.purchases or "bundle" in r.purchases %}
+    <a class="lien-grave" href="/l/{{ token }}/lecture">{{ ui.achats.voir_lecture }}</a>
+    {%- else %}
+    <button type="button" class="bouton bouton-laiton {{ 'achat' if paiement else 'ouvre-bientot' }}" data-produit="lecture">{{ ui.modules.lecture_bouton }}</button>
+    {%- endif %}
   </section>
   <section class="module module-laiton" id="calendrier">
     <h2 class="module-label">{{ ui.modules.calendrier_label }}</h2>
     <p class="module-titre module-titre-italique">{{ ui.modules.calendrier_titre }}</p>
     <p class="module-corps">{{ ui.modules.calendrier_texte }}</p>
     <p class="module-texte">{{ ui.modules.calendrier_note }}</p>
-    <button type="button" class="bouton bouton-laiton ouvre-bientot">{{ ui.modules.calendrier_bouton }}</button>
+    {%- if "calendrier" in r.purchases or "bundle" in r.purchases %}
+    <a class="lien-grave" href="/l/{{ token }}/calendrier">{{ ui.achats.voir_calendrier }}</a>
+    {%- else %}
+    <button type="button" class="bouton bouton-laiton {{ 'achat' if paiement else 'ouvre-bientot' }}" data-produit="calendrier">{{ ui.modules.calendrier_bouton }}</button>
+    {%- endif %}
   </section>
   <section class="module module-bundle">
     <h2 class="module-label">{{ ui.modules.bundle_label }}</h2>
     <p class="module-titre module-titre-italique">{{ ui.modules.bundle_titre }}</p>
-    <button type="button" class="bouton bouton-plein ouvre-bientot">{{ ui.modules.bundle_bouton }} <s class="barre">{{ ui.modules.bundle_barre }}</s></button>
+    {%- if not r.purchases %}
+    <button type="button" class="bouton bouton-plein {{ 'achat' if paiement else 'ouvre-bientot' }}" data-produit="bundle">{{ ui.modules.bundle_bouton }} <s class="barre">{{ ui.modules.bundle_barre }}</s></button>
+    {%- endif %}
   </section>
 
   <section class="module module-lien">

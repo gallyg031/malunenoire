@@ -301,3 +301,21 @@ p { margin: 0; }
 .publique-carte { width: 300px; aspect-ratio: 1080 / 1920; border-radius: 6px; overflow: hidden; box-shadow: 0 24px 70px rgba(0, 0, 0, .6); }
 .publique .bouton { width: 262px; }
 .pied-public { padding-top: 10px; }
+
+/* ---------------------------------------------------------------- payant (phase 1.5) */
+.achat-merci { font-style: italic; font-size: 18px; color: var(--ivoire); text-align: center; padding: 0 6px 10px; }
+.calendrier-sous { margin-top: 10px; }
+.calendrier-ics { margin-top: 20px; }
+.calendrier-mois { text-align: left; margin-top: 30px; }
+.calendrier { margin: 10px 0 0; padding: 0; list-style: none; }
+.calendrier-ligne { display: flex; gap: 16px; padding: 14px 2px; border-top: 1px solid rgba(44, 46, 56, .7); }
+.calendrier-date { flex: 0 0 92px; font-family: var(--gravure); font-size: 10px; letter-spacing: 2px; color: var(--laiton); padding-top: 4px; }
+.calendrier-texte { display: flex; flex-direction: column; gap: 3px; }
+.calendrier-phrase { font-size: 17px; color: var(--lune); line-height: 1.4; }
+.calendrier-retour { margin-top: 30px; }
+.lecture .citation { margin: 14px 0 6px; }
+.croix { margin: 0; padding: 0; list-style: none; }
+.croix li { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid rgba(44, 46, 56, .7); }
+.croix-point { color: var(--lune); }
+.croix-pos { font-family: var(--gravure); font-size: 11px; letter-spacing: 2px; color: var(--laiton); }
+.lecture-attente { font-style: italic; color: var(--lie-texte); margin-top: 24px; }

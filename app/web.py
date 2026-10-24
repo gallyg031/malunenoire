@@ -3,14 +3,16 @@
 
 import functools
 import os
+from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse, Response
 from fastapi.templating import Jinja2Templates
 
+import astro
 import lune
 from app import config, db
-from app.services import cartes, emails, rendu
+from app.services import achats, cartes, emails, rendu
 from app.services import readings as rd
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,6 +28,7 @@ PRIVE = {"Cache-Control": "private, no-store", "Referrer-Policy": "no-referrer",
 
 
 def page(request, gabarit, statut=200, entetes=None, **ctx):
+    ctx.setdefault("paiement", config.PAIEMENT_ACTIF)
     resp = templates.TemplateResponse(request, gabarit, ctx, status_code=statut)
     for k, v in (entetes or {}).items():
         resp.headers[k] = v
@@ -73,7 +76,7 @@ def revelation(request: Request, token: str):
     return page(request, "revelation.html", entetes=PRIVE, token=token, r=r,
                 cartes=[(d, _carte(d, r)) for d in designs],
                 design=cartes.design_effectif(r["design"], signe), fond_mini=fond,
-                brouillon=_brouillon(r["text"]))
+                brouillon=_brouillon(r["text"]), achat_ok=request.query_params.get("achat") == "ok")
 
 
 @router.get("/l/{token}/sanctuaire", response_class=HTMLResponse)
@@ -197,3 +200,68 @@ def desinscription_post(request: Request, cle: str):
     with db.pool.connection() as conn:
         emails.desinscrire(conn, rid)
     return page(request, "desinscription.html", 200, PRIVE, valide=True, fait=True)
+
+
+# ---------------------------------------------------------------- payant (phase 1.5)
+
+def _achats(request, token):
+    row, r = _lecture(request, token)
+    if r is None:
+        return None, None, None
+    with db.pool.connection() as conn:
+        produits = achats.produits_payes(conn, row["id"])
+    return row, r, produits
+
+
+def _lignes_calendrier(events, debut, tz):
+    """[(titre du mois, [{date, phrase, fenetre}])] des passages exacts à venir."""
+    t = lune.ui()["affichage"]
+    aujourdhui = datetime.now(tz).date()
+    fr = lambda dt: lune.date_fr(dt.astimezone(tz).date(), aujourdhui)
+    fin = datetime.fromisoformat(debut).replace(tzinfo=timezone.utc) + timedelta(days=31 * achats.HORIZON_CALENDRIER)
+    depuis = datetime.now(timezone.utc) - timedelta(days=1)
+    lignes = []
+    for e in events:
+        if e.kind == "transit":
+            fenetre = (t["fenetre"].format(debut=fr(e.enter), fin=fr(e.exit)) if e.exit
+                       else t["fenetre_ouverte"].format(debut=fr(e.enter)))
+        else:
+            fenetre = ""
+        for x in e.exacts:
+            if depuis < x <= fin:
+                lignes.append((x, {"date": fr(x), "phrase": lune.phrase(e), "fenetre": fenetre}))
+    lignes.sort(key=lambda l: l[0])
+    mois = []
+    for x, l in lignes:
+        local = x.astimezone(tz)
+        titre = f"{lune.MOIS[local.month - 1]} {local.year}"
+        if not mois or mois[-1][0] != titre:
+            mois.append((titre, []))
+        mois[-1][1].append(l)
+    return mois
+
+
+@router.get("/l/{token}/calendrier", response_class=HTMLResponse)
+def calendrier(request: Request, token: str):
+    row, r, produits = _achats(request, token)
+    if r is None:
+        return erreur(request, lune.ui()["systeme"]["token_inconnu"], entetes=PRIVE)
+    if not achats.a_le_calendrier(produits):
+        return erreur(request, lune.ui()["achats"]["non_achete"], 403, PRIVE)
+    with db.pool.connection() as conn:
+        events, debut = achats.evenements_calendrier(conn, row["id"])
+    mois = _lignes_calendrier(events, debut, rd.tz_affichage(row))
+    return page(request, "calendrier.html", entetes=PRIVE, token=token, r=r, mois=mois)
+
+
+@router.get("/l/{token}/lecture", response_class=HTMLResponse)
+def lecture(request: Request, token: str):
+    row, r, produits = _achats(request, token)
+    if r is None:
+        return erreur(request, lune.ui()["systeme"]["token_inconnu"], entetes=PRIVE)
+    if not achats.a_la_lecture(produits):
+        return erreur(request, lune.ui()["achats"]["non_achete"], 403, PRIVE)
+    texte = request.app.state.corpus.get(r["sign"], row["ln_house"])
+    croix = {p: astro.fmt(a["lon"]) for p, a in row["cross_json"].items()}
+    return page(request, "lecture.html", entetes=PRIVE, token=token, r=r, croix=croix,
+                complet=texte.get("complet"))

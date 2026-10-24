@@ -12,8 +12,8 @@ from pydantic import BaseModel, Field, field_validator
 from psycopg.rows import dict_row
 
 import lune
-from app import db
-from app.services import emails
+from app import config, db
+from app.services import achats, emails
 from app.services import readings as rd
 from app.services.corpus import CLES, PARTS
 
@@ -201,19 +201,50 @@ def calendrier_ics(token: str):
         row = rd.trouver(conn, token)
         if row is None:
             return _no_store(erreur(404, "introuvable"))
-        achat = conn.cursor(row_factory=dict_row).execute(
-            """select snapshot, paid_at from purchases where reading_id = %s and status = 'paid'
-               and product = any(%s) order by paid_at desc limit 1""",
-            (row["id"], list(rd.PRODUITS_CALENDRIER))).fetchone()
-        if achat is None or not achat["snapshot"]:
+        cal = achats.evenements_calendrier(conn, row["id"])
+        if cal is None:
             return _no_store(erreur(403, "not_purchased", "non_achete"))
         rd.event(conn, "ics_download", {"kind": "calendrier"})
-        events = [lune.Event(**{**e, "enter": datetime.fromisoformat(e["enter"]),
-                                "exit": datetime.fromisoformat(e["exit"]) if e["exit"] else None,
-                                "exacts": [datetime.fromisoformat(x) for x in e["exacts"]]})
-                  for e in achat["snapshot"]["events"]]
+        events, debut = cal
         tz = row["tz_user"] or row["tz_birth"]
-    return _ics(lune.ics_calendar(events, token, tz, achat["paid_at"].date()))
+    return _ics(lune.ics_calendar(events, token, tz, date.fromisoformat(debut),
+                                  months=achats.HORIZON_CALENDRIER))
+
+
+# ---------------------------------------------------------------- paiement (phase 1.5)
+
+class CheckoutIn(BaseModel):
+    token: str = Field(max_length=22)
+    product: Literal["lecture", "calendrier", "bundle"]
+
+
+@router.post("/checkout")
+def checkout(body: CheckoutIn):
+    with db.pool.connection() as conn:
+        row = rd.trouver(conn, body.token)
+        if row is None:
+            return _no_store(erreur(404, "introuvable"))
+        try:
+            url = achats.creer_session(conn, row, body.product, config.BASE_URL)
+        except achats.PaiementIndisponible:
+            return _no_store(erreur(503, "paiement_indisponible", "paiement_indisponible"))
+    return _no_store(JSONResponse({"ok": True, "url": url}))
+
+
+@router.post("/stripe/webhook")
+async def stripe_webhook(request: Request):
+    """Seul juge du paiement : l'événement signé par Stripe."""
+    import stripe
+    corps = await request.body()
+    try:
+        evt = stripe.Webhook.construct_event(corps, request.headers.get("stripe-signature", ""),
+                                             config.STRIPE_WEBHOOK_SECRET)
+    except Exception:
+        return JSONResponse({"ok": False}, status_code=400)
+    if evt["type"] == "checkout.session.completed":
+        with db.pool.connection() as conn:
+            achats.confirmer(conn, evt["data"]["object"])
+    return JSONResponse({"ok": True})
 
 
 # ---------------------------------------------------------------- e-mail (D14)

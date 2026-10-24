@@ -137,3 +137,17 @@
     document.getElementById("efface").hidden = false;
   });
 })();
+
+/* Achat (phase 1.5) : Stripe Checkout ; si le paiement n'est pas ouvert, la feuille « bientôt ». */
+(function () {
+  "use strict";
+  const LLN = window.LLN, token = document.body.dataset.token;
+  document.querySelectorAll(".achat").forEach((b) => b.addEventListener("click", async () => {
+    b.disabled = true;
+    const r = await LLN.appel("/api/checkout", { token, product: b.dataset.produit }).catch(() => null);
+    if (r && r.statut === 200 && r.data.url) { window.location.href = r.data.url; return; }
+    b.disabled = false;
+    const f = document.getElementById("feuille-bientot");
+    if (f) LLN.ouvrir(f);
+  }));
+})();

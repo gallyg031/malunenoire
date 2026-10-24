@@ -109,6 +109,8 @@ def contenu(conn, item, row):
     fr = lambda dt: lune.date_fr(dt.astimezone(tz).date(), today)
     if item["kind"] == "link":
         return t["link_sujet"], list(t["link_corps"])
+    if item["kind"] == "purchase":
+        return t["purchase_sujet"].get(item["ref"], t["purchase_sujet"]["bundle"]), list(t["purchase_corps"])
     if item["kind"] == "activation":
         event_id, _, n = item["ref"].rpartition("-")
         e = next((e for e in rd.evenements(conn, row["id"]) if e.id == event_id), None)
