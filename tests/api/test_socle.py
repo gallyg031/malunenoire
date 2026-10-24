@@ -20,8 +20,9 @@ def client(monkeypatch):
         yield c
 
 
-def test_healthz(client):
-    r = client.get("/healthz")
+@pytest.mark.parametrize("path", ["/healthz", "/health"])
+def test_healthz(client, path):
+    r = client.get(path)
     assert r.status_code == 200
     assert r.json()["golden"] is True
 

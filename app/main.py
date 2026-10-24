@@ -54,6 +54,7 @@ def error(status, code, message):
     return JSONResponse({"ok": False, "error": code, "message": message}, status_code=status)
 
 
+@app.get("/health")   # Cloud Run réserve /healthz sur ses URL : /health est la sonde en production
 @app.get("/healthz")
 def healthz():
     checks = {"golden": state["golden"], "db": None}
