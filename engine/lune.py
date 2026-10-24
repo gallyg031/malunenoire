@@ -482,10 +482,12 @@ MOIS = ["janvier", "février", "mars", "avril", "mai", "juin", "juillet", "août
 BASE_URL = "https://malunenoire.fr"
 
 
-def date_fr(d):
-    """date -> « 1er décembre », « 3 décembre »."""
+def date_fr(d, ref=None):
+    """date -> « 1er décembre », « 3 décembre » ; « 11 juillet 2027 » si l'année
+    diffère de celle de `ref` (date de référence : aujourd'hui, ou le jour exact)."""
     jour = "1er" if d.day == 1 else str(d.day)
-    return f"{jour} {MOIS[d.month - 1]}"
+    annee = f" {d.year}" if ref is not None and d.year != ref.year else ""
+    return f"{jour} {MOIS[d.month - 1]}{annee}"
 
 
 def _esc(s):
@@ -513,17 +515,18 @@ def _description(e, exact, tz):
     p = phrase(e)
     if p.startswith(("Le ", "Ta ", "Retour ")):        # en milieu de phrase
         p = p[0].lower() + p[1:]
+    ref = local(exact)
     if e.kind == "ln_ingress":
-        return f"{p} le {date_fr(local(exact))}."
+        return f"{p} le {date_fr(ref)}."
     d0 = local(e.enter)
-    debut = date_fr(d0)
+    debut = date_fr(d0, ref)
     if e.exit is None:
         fenetre = f"À partir du {debut}, pendant encore des mois"
     else:
         d1 = local(e.exit)
         if (d0.year, d0.month) == (d1.year, d1.month):
             debut = "1er" if d0.day == 1 else str(d0.day)    # « Du 6 au 9 février »
-        fenetre = f"Du {debut} au {date_fr(d1)}"
+        fenetre = f"Du {debut} au {date_fr(d1, ref)}"
     return f"{fenetre}, {p}. Exact le {date_fr(local(exact))}."
 
 

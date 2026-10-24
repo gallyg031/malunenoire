@@ -186,18 +186,18 @@ def activation_payload(sel, tz):
     t = lune.ui()["affichage"]
     e = sel.event
     local = lambda dt: dt.astimezone(tz).date()
+    today = datetime.now(tz).date()
+    fr = lambda dt: lune.date_fr(local(dt), today)
     raw = {"body": e.body, "aspect": e.aspect, "point": e.point, "kind": e.kind,
            "enter": e.enter.isoformat(), "exit": e.exit.isoformat() if e.exit else None,
            "exacts": [x.isoformat() for x in e.exacts], "ics_exact": sel.ics_exact.isoformat()}
     out = {"mode": sel.mode, "phrase": lune.phrase(e), "raw": raw}
     if sel.mode == "now":
-        out["jusqu"] = (t["jusqu_au"].format(date=lune.date_fr(local(e.exit))) if e.exit
-                        else t["encore_des_mois"])
+        out["jusqu"] = t["jusqu_au"].format(date=fr(e.exit)) if e.exit else t["encore_des_mois"]
     else:
-        out["date"] = lune.date_fr(local(e.exacts[0]))
-        fin = lune.date_fr(local(e.exit)) if e.exit else None
-        out["fenetre"] = (t["fenetre"].format(debut=lune.date_fr(local(e.enter)), fin=fin)
-                          if fin else t["fenetre_ouverte"].format(debut=lune.date_fr(local(e.enter))))
+        out["date"] = fr(e.exacts[0])
+        out["fenetre"] = (t["fenetre"].format(debut=fr(e.enter), fin=fr(e.exit)) if e.exit
+                          else t["fenetre_ouverte"].format(debut=fr(e.enter)))
     return out
 
 

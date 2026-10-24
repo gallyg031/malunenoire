@@ -292,6 +292,12 @@ def test_ics_calendrier(events):
     assert any("entre en" in str(v["SUMMARY"]) for v in vevents)      # ingrès inclus
 
 
+def test_date_fr_annee():
+    assert lune.date_fr(date(2027, 7, 1)) == "1er juillet"
+    assert lune.date_fr(date(2027, 7, 11), date(2027, 1, 5)) == "11 juillet"
+    assert lune.date_fr(date(2027, 7, 11), date(2026, 10, 24)) == "11 juillet 2027"
+
+
 def test_ics_pliage_utf8():
     ligne = "DESCRIPTION:" + "é" * 100
     plie = lune._fold(ligne)
