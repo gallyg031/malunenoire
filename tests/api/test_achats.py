@@ -2,6 +2,7 @@
 """Phase 1.5 : Stripe Checkout (simulé), webhook, calendrier et lecture complète."""
 
 import html
+import json
 
 import pytest
 import stripe
@@ -48,6 +49,17 @@ def test_paiement_ferme_par_defaut(client):
     assert r.status_code == 503 and r.json()["error"] == "paiement_indisponible"
     page = client.get(f"/l/{d['token']}").text
     assert "ouvre-bientot" in page and 'class="bouton bouton-laiton achat"' not in page
+
+
+def test_prix_d13():
+    """D13 (25/10) : lecture 12 €, calendrier 5 €, bundle 15 €, en cohérence avec les libellés affichés."""
+    from app import config
+    assert config.PRIX == {"lecture": 1200, "calendrier": 500, "bundle": 1500}
+    ui = json.load(open("content/ui.json", encoding="utf-8"))
+    assert ui["modules"]["lecture_bouton"].endswith("12 €") and ui["modules"]["calendrier_bouton"].endswith("5 €")
+    assert ui["modules"]["bundle_bouton"].endswith("15 €") and ui["modules"]["bundle_barre"] == "17 €"
+    assert ui["sanctuaire"]["pack"]["prix"] == "19 €" and ui["sanctuaire"]["pack"]["barre"] == "26 €"
+    assert [l["nom"] for l in ui["sanctuaire"]["produits"]] == ["La lecture complète", "Le calendrier", "La synastrie d'ombre complète"]
 
 
 def test_checkout(client, sql, paiement):

@@ -2,6 +2,7 @@
 """Corpus (spec 07 §2) : validateur et chargeur."""
 
 import json
+import os
 
 import pytest
 
@@ -61,6 +62,14 @@ def test_avertissements():
     _, w = check(eclats=["Vous êtes ici dans un texte de test qui vouvoie, ce qui est à éviter.",
                          "b" * 100, "c" * 100])
     assert any("vouvoiement" in x for x in w)
+    _, w = check(eclats=["Entre vous, tout se joue en silence ; à vous deux, vous tenez une scène que personne ne voit.",
+                         "b" * 100, "c" * 100])
+    assert any("vouvoiement" in x for x in w)          # « vous tenez » reste un vouvoiement
+    _, w = check(eclats=["Entre vous, tout se joue en silence ; à vous deux, la scène reste invisible aux autres.",
+                         "b" * 100, "c" * 100])
+    assert not any("vouvoiement" in x for x in w)
+    _, w = check(ouverture="Tu as appris à céder pour garder la paix. Ce que tu peux faire, c'est poser ta limite à voix haute.")
+    assert not any("soumission" in x for x in w)       # seule la dernière phrase compte
 
 
 def test_phrases_identiques(tmp_path):
@@ -115,3 +124,24 @@ def test_validateur_cli(tmp_path, capsys):
                                            encoding="utf-8")
     assert v.main(["--dossier", str(tmp_path), "--strict"]) == 1
     assert "CORPUS REFUSÉ" in capsys.readouterr().out
+
+
+def test_ouverture_niant_la_soumission():
+    _, w = check(ouverture="Ta colère, quand elle vient, sert à choisir où va ton soin. Elle est juste si elle sert à orienter, pas à abandonner.")
+    assert not any("soumission" in x for x in w)
+
+
+VRAI_CORPUS = os.path.join(corpus.ROOT, "content", "textes")
+
+
+@pytest.mark.skipif(len([f for f in (os.listdir(VRAI_CORPUS) if os.path.isdir(VRAI_CORPUS) else [])
+                         if f.endswith(".json")]) < 156, reason="corpus réel absent (privé)")
+def test_corpus_reel_complet():
+    """Les 156 textes livrés : valides, et (signe, maison) / (signe, sans heure) résolus sans repli."""
+    lus = corpus.lire(VRAI_CORPUS)
+    assert not {k: e for k, (_, e, _) in lus.items() if e}
+    c = corpus.Corpus(VRAI_CORPUS)
+    for s in corpus.SIGNES:
+        for m in [None, *range(1, 13)]:
+            t = c.get(s, m)
+            assert not t.get("repli") and t["id"] == corpus.cle(s, m)

@@ -1,6 +1,6 @@
 # Développement local.
 #   docker compose run --rm tests        # pytest -q contre un Postgres jetable
-#   docker compose up app                # http://localhost:8080
+#   docker compose up app                # http://localhost:8090
 services:
   db:
     image: postgres:16-alpine
@@ -20,7 +20,7 @@ services:
       target: dev
     volumes: [".:/w"]
     environment:
-      TEST_DATABASE_URL: postgresql://lune:lune@db:5432/lune
+      TEST_DATABASE_URL: postgresql://lune:lune@db:5432/lune_test   # base séparée de celle du serveur local
     depends_on:
       db: {condition: service_healthy}
     command: pytest -q
@@ -31,6 +31,6 @@ services:
     environment:
       ENV: local
       DATABASE_URL: postgresql://lune:lune@db:5432/lune
-    ports: ["8080:8080"]
+    ports: ["8090:8080"]   # 8080 est pris par NeoQuest sur ce poste
     depends_on:
       db: {condition: service_healthy}

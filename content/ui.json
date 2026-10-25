@@ -122,7 +122,7 @@
     "lecture_titre": "Tu viens de lire le seuil. Voici la pièce.",
     "lecture_texte": "Ce que tu protèges, ce que tu provoques, ce que tu n'oses pas demander — et d'où ça vient. L'histoire entière, jusqu'au mythe qui la fonde.",
     "lecture_note": "Un document nocturne, à toi, à garder.",
-    "lecture_bouton": "RECEVOIR LA LECTURE — 7 €",
+    "lecture_bouton": "RECEVOIR LA LECTURE — 12 €",
     "calendrier_label": "LE CALENDRIER",
     "calendrier_titre": "Tu sais maintenant où ça appuie. Voici quand.",
     "calendrier_texte": "Les jours où ta Lune Noire sera touchée, sur les douze prochains mois — ce qui s'ouvre, ce qui se rejoue, quand ça se referme. Pour ne plus être pris·e de court.",
@@ -130,8 +130,8 @@
     "calendrier_bouton": "RECEVOIR LE CALENDRIER — 5 €",
     "bundle_label": "LES DEUX, ENSEMBLE",
     "bundle_titre": "L'histoire entière, et ses dates.",
-    "bundle_bouton": "RECEVOIR LES DEUX — 10 €",
-    "bundle_barre": "12 €",
+    "bundle_bouton": "RECEVOIR LES DEUX — 15 €",
+    "bundle_barre": "17 €",
     "bientot_feuille": "Bientôt disponible. Laisse ton e-mail pour être prévenu·e.",
     "lien_titre": "Ce lien est ta Lune Noire.",
     "lien_texte": "Pas de compte, pas de mot de passe : garde-le. Il s'enrichira.",
@@ -154,12 +154,11 @@
     "prochaine": "Prochaine activation : {date}.",
     "bibliotheque": "LA BIBLIOTHÈQUE",
     "produits": [
-      {"nom": "La lecture complète", "sous": "l'histoire entière, jusqu'au mythe", "prix": "7 €"},
+      {"nom": "La lecture complète", "sous": "l'histoire entière, jusqu'au mythe", "prix": "12 €"},
       {"nom": "Le calendrier", "sous": "tes douze prochains mois", "prix": "5 €"},
-      {"nom": "La synastrie d'ombre complète", "sous": "vous deux, sans complaisance ni fatalité", "prix": "9 €"},
-      {"nom": "Comprendre ta Lune Noire", "sous": "le guide, écrit à la main", "prix": "9 €"}
+      {"nom": "La synastrie d'ombre complète", "sous": "vous deux, sans complaisance ni fatalité", "prix": "9 €"}
     ],
-    "pack": {"nom": "Tout savoir de ta Lune Noire", "sous": "lecture + calendrier + synastrie", "prix": "15 €", "barre": "21 €"}
+    "pack": {"nom": "Tout savoir de ta Lune Noire", "sous": "lecture + calendrier + synastrie", "prix": "19 €", "barre": "26 €"}
   },
   "emails": {
     "expediteur": "Ma Lune Noire <lune@malunenoire.fr>",

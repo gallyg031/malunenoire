@@ -33,3 +33,21 @@ os.environ["CORPUS_DIR"] = CORPUS_TEST
 import astro  # noqa: E402
 
 astro.set_ephe(os.environ.get("EPHE_PATH", os.path.join(ROOT, "data", "ephe")))
+
+
+def _creer_base_de_test():
+    """La base de test est distincte de celle du serveur local (créée si absente)."""
+    url = os.environ.get("TEST_DATABASE_URL")
+    if not url:
+        return
+    import psycopg
+    base = url.rsplit("/", 1)[1].split("?")[0]
+    try:
+        with psycopg.connect(url.rsplit("/", 1)[0] + "/postgres", autocommit=True) as conn:
+            if not conn.execute("select 1 from pg_database where datname = %s", (base,)).fetchone():
+                conn.execute(f'create database "{base}"')
+    except psycopg.Error:
+        pass
+
+
+_creer_base_de_test()

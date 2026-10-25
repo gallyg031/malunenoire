@@ -77,5 +77,5 @@ def test_token_inconnu_et_efface(client):
 def test_sanctuaire(client):
     d = creer(client)
     r = client.get(f"/l/{d['token']}/sanctuaire")
-    assert r.status_code == 200 and "LA BIBLIOTHÈQUE" in r.text and "15 €" in r.text
+    assert r.status_code == 200 and "LA BIBLIOTHÈQUE" in r.text and "19 €" in r.text and "Comprendre ta Lune Noire" not in r.text
     assert r.headers["cache-control"] == "private, no-store"

@@ -20,9 +20,9 @@ CLES = [f"{s}-{m:02d}" for s in SIGNES for m in range(13)]          # 156
 STATUTS = ("brouillon", "relu", "publie")
 PARTS = ("phrase", "eclat1", "eclat2", "eclat3", "ouverture")
 
-PHRASE_MAX = 110       # spec : 90 ; sagittaire-09 (test de phrase longue) en fait 102 — à trancher
-ECLAT = (60, 240)      # spec : 80 ; l’éclat III de scorpion-08 (étalon) en fait 68 — à trancher
-OUVERTURE = (100, 260)
+PHRASE_MAX = 90
+ECLAT = (80, 270)      # spec 03 §2, relevée le 25/10/2026
+OUVERTURE = (100, 320) # spec 03 §2, relevée le 25/10/2026
 COMPLET = (600, 1500)
 COMPLET_CHAMPS = ("priape", "soumission", "affirmation", "aspects", "mythe")
 
@@ -146,12 +146,16 @@ def check(d, nom_fichier=None):
                          tout, re.IGNORECASE):
         warn.append(f"épicène : « {m.group(0)} » (ajouter ·e ou reformuler)")
     hors_citation = re.sub(r"«[^»]*»", "", tout)
-    if re.search(r"\bvous\b", hors_citation, re.IGNORECASE):
+    # « entre vous », « à vous deux », « devant vous » : toi + l'autre, pas du vouvoiement
+    if re.search(r"(?<!\bentre )(?<!\bdevant )(?<!\bchez )(?<!\bà )\bvous\b(?! deux\b)",
+                 hors_citation, re.IGNORECASE):
         warn.append("vouvoiement hors citation")
     if isinstance(o, str):
-        po = _plain(o)
+        # seule la dernière phrase compte : c'est sur elle que le gratuit se termine
+        po = _plain(re.split(r"(?<=[.!?…])\s+", o.strip())[-1])
         if re.search(r"soumission|te rendre|ceder|abandonner", po) and \
-                not re.search(r"\bmais\b|\bsauf\b|et pourtant", po):
+                not re.search(r"\bmais\b|\bsauf\b|et pourtant|\bpas a\b|\bpas de\b", po):
+            # « … pas à abandonner » nie la soumission : l'ouverture nomme bien l'affirmation
             warn.append("l'ouverture semble finir sur la soumission (elle doit nommer l'affirmation)")
     for phrase_ in re.split(r"(?<=[.!?…])\s+", tout):
         if re.search(r"\btu vas\b", phrase_, re.IGNORECASE) and \
